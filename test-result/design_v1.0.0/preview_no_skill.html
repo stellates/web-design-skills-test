@@ -1,0 +1,638 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Using AI Dashboard</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+  <style>
+    :root{
+      --app-bg:#f5f7fa;
+      --surface:#ffffff;
+      --border:#dfe5ec;
+      --muted:#6c757d;
+      --text:#24313f;
+      --sidebar:#263746;
+    }
+
+    body{
+      margin:0;
+      background:var(--app-bg);
+      color:var(--text);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    .app-shell{
+      min-height:100vh;
+      display:grid;
+      grid-template-columns:240px 1fr;
+    }
+
+    .sidebar{
+      background:var(--sidebar);
+      color:#fff;
+      padding:22px 16px;
+      position:sticky;
+      top:0;
+      height:100vh;
+    }
+
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      font-weight:700;
+      font-size:1.05rem;
+      padding:6px 8px 22px;
+      border-bottom:1px solid rgba(255,255,255,.12);
+      margin-bottom:18px;
+    }
+
+    .brand-icon{
+      width:34px;
+      height:34px;
+      border-radius:8px;
+      display:grid;
+      place-items:center;
+      background:rgba(255,255,255,.12);
+    }
+
+    .nav-link{
+      color:rgba(255,255,255,.78);
+      border-radius:8px;
+      padding:.7rem .8rem;
+      margin-bottom:4px;
+      display:flex;
+      align-items:center;
+      gap:10px;
+    }
+
+    .nav-link:hover,
+    .nav-link.active{
+      color:#fff;
+      background:rgba(255,255,255,.12);
+    }
+
+    .sidebar-footer{
+      position:absolute;
+      left:16px;
+      right:16px;
+      bottom:18px;
+      font-size:.8rem;
+      color:rgba(255,255,255,.56);
+    }
+
+    .main{
+      min-width:0;
+    }
+
+    .topbar{
+      height:72px;
+      background:#fff;
+      border-bottom:1px solid var(--border);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      padding:0 28px;
+      position:sticky;
+      top:0;
+      z-index:10;
+    }
+
+    .content{
+      padding:26px 28px 40px;
+    }
+
+    .page-title{
+      font-size:1.35rem;
+      font-weight:700;
+      margin:0;
+    }
+
+    .page-subtitle{
+      font-size:.9rem;
+      color:var(--muted);
+      margin-top:3px;
+    }
+
+    .sync-box{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      font-size:.88rem;
+      color:var(--muted);
+    }
+
+    .live-dot{
+      width:8px;
+      height:8px;
+      background:#198754;
+      border-radius:50%;
+      box-shadow:0 0 0 4px rgba(25,135,84,.12);
+    }
+
+    .metric-card,
+    .panel-card{
+      background:var(--surface);
+      border:1px solid var(--border);
+      border-radius:12px;
+      box-shadow:0 1px 2px rgba(36,49,63,.03);
+    }
+
+    .metric-card{
+      padding:18px;
+      height:100%;
+    }
+
+    .metric-label{
+      font-size:.82rem;
+      color:var(--muted);
+      margin-bottom:10px;
+    }
+
+    .metric-value{
+      font-size:1.7rem;
+      font-weight:700;
+      line-height:1;
+    }
+
+    .metric-help{
+      color:var(--muted);
+      font-size:.8rem;
+      margin-top:8px;
+    }
+
+    .section-title{
+      font-size:1rem;
+      font-weight:700;
+      margin:0;
+    }
+
+    .panel-card .panel-head{
+      padding:16px 18px;
+      border-bottom:1px solid var(--border);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+    }
+
+    .panel-card .panel-body{
+      padding:0;
+    }
+
+    .service-table{
+      margin:0;
+    }
+
+    .service-table th{
+      color:var(--muted);
+      font-size:.76rem;
+      font-weight:600;
+      text-transform:uppercase;
+      letter-spacing:.03em;
+      padding:12px 16px;
+      border-bottom-color:var(--border);
+      background:#fafbfc;
+    }
+
+    .service-table td{
+      padding:15px 16px;
+      border-bottom-color:#edf1f5;
+      vertical-align:middle;
+    }
+
+    .service-name{
+      display:flex;
+      align-items:center;
+      gap:11px;
+      min-width:170px;
+    }
+
+    .service-logo{
+      width:34px;
+      height:34px;
+      display:grid;
+      place-items:center;
+      border-radius:9px;
+      background:#eef2f6;
+      color:#425466;
+      font-weight:700;
+      font-size:.8rem;
+    }
+
+    .service-title{
+      font-weight:650;
+      font-size:.93rem;
+    }
+
+    .service-meta{
+      color:var(--muted);
+      font-size:.76rem;
+      margin-top:2px;
+    }
+
+    .status-pill{
+      display:inline-flex;
+      align-items:center;
+      gap:7px;
+      border-radius:999px;
+      padding:5px 9px;
+      font-size:.78rem;
+      font-weight:600;
+      white-space:nowrap;
+    }
+
+    .status-ok{
+      background:#eaf6ef;
+      color:#146c43;
+    }
+
+    .status-warn{
+      background:#fff4df;
+      color:#8a5a00;
+    }
+
+    .status-down{
+      background:#fdecec;
+      color:#b02a37;
+    }
+
+    .usage-cell{
+      min-width:170px;
+    }
+
+    .progress{
+      height:7px;
+      background:#edf1f5;
+    }
+
+    .usage-label{
+      display:flex;
+      justify-content:space-between;
+      font-size:.76rem;
+      color:var(--muted);
+      margin-bottom:5px;
+    }
+
+    .news-item{
+      padding:15px 18px;
+      border-bottom:1px solid #edf1f5;
+    }
+
+    .news-item:last-child{
+      border-bottom:0;
+    }
+
+    .news-time{
+      color:var(--muted);
+      font-size:.74rem;
+      margin-bottom:5px;
+    }
+
+    .news-title{
+      font-size:.9rem;
+      font-weight:600;
+      margin-bottom:4px;
+    }
+
+    .news-source{
+      font-size:.77rem;
+      color:var(--muted);
+    }
+
+    .activity-list{
+      padding:4px 18px 12px;
+    }
+
+    .activity{
+      display:grid;
+      grid-template-columns:12px 1fr auto;
+      gap:10px;
+      align-items:start;
+      padding:12px 0;
+      border-bottom:1px solid #edf1f5;
+    }
+
+    .activity:last-child{
+      border-bottom:0;
+    }
+
+    .activity-dot{
+      width:8px;
+      height:8px;
+      border-radius:50%;
+      background:#6c757d;
+      margin-top:6px;
+    }
+
+    .activity-title{
+      font-size:.84rem;
+      font-weight:600;
+    }
+
+    .activity-detail,
+    .activity-time{
+      font-size:.75rem;
+      color:var(--muted);
+      margin-top:2px;
+    }
+
+    .refresh-spin{
+      animation:spin .8s linear infinite;
+    }
+
+    @keyframes spin{
+      to{ transform:rotate(360deg); }
+    }
+
+    @media (max-width: 992px){
+      .app-shell{ grid-template-columns:1fr; }
+      .sidebar{ display:none; }
+      .topbar{ padding:0 18px; }
+      .content{ padding:20px 18px 32px; }
+    }
+
+    @media (max-width: 768px){
+      .sync-box .sync-label{ display:none; }
+      .service-table{
+        min-width:820px;
+      }
+      .table-wrap{
+        overflow-x:auto;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-icon"><i class="bi bi-grid-1x2-fill"></i></div>
+        <span>Using AI Dashboard</span>
+      </div>
+
+      <nav>
+        <a class="nav-link active" href="#"><i class="bi bi-speedometer2"></i> ダッシュボード</a>
+        <a class="nav-link" href="#"><i class="bi bi-cpu"></i> AIサービス</a>
+        <a class="nav-link" href="#"><i class="bi bi-bar-chart"></i> 使用量</a>
+        <a class="nav-link" href="#"><i class="bi bi-bell"></i> アラート</a>
+        <a class="nav-link" href="#"><i class="bi bi-gear"></i> 設定</a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div>Realtime monitoring enabled</div>
+        <div class="mt-1">v0.1 prototype</div>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div>
+          <h1 class="page-title">ダッシュボード</h1>
+          <div class="page-subtitle">利用中AIサービスの状況を一画面で確認</div>
+        </div>
+
+        <div class="sync-box">
+          <span class="live-dot"></span>
+          <span class="sync-label">リアルタイム同期</span>
+          <span id="lastSync">最終同期 --:--:--</span>
+          <button id="refreshBtn" class="btn btn-sm btn-outline-secondary" type="button" title="今すぐ同期">
+            <i id="refreshIcon" class="bi bi-arrow-clockwise"></i>
+          </button>
+        </div>
+      </header>
+
+      <section class="content">
+        <div class="row g-3 mb-4">
+          <div class="col-6 col-xl-3">
+            <div class="metric-card">
+              <div class="metric-label">監視中サービス</div>
+              <div class="metric-value">5</div>
+              <div class="metric-help">すべて同期対象</div>
+            </div>
+          </div>
+
+          <div class="col-6 col-xl-3">
+            <div class="metric-card">
+              <div class="metric-label">正常稼働</div>
+              <div class="metric-value text-success" id="healthyCount">4</div>
+              <div class="metric-help">直近の監視結果</div>
+            </div>
+          </div>
+
+          <div class="col-6 col-xl-3">
+            <div class="metric-card">
+              <div class="metric-label">障害・注意</div>
+              <div class="metric-value text-warning" id="issueCount">1</div>
+              <div class="metric-help">要確認サービス</div>
+            </div>
+          </div>
+
+          <div class="col-6 col-xl-3">
+            <div class="metric-card">
+              <div class="metric-label">今月の推定利用額</div>
+              <div class="metric-value">¥18,420</div>
+              <div class="metric-help">前月比 +8.2%</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="row g-4">
+          <div class="col-12 col-xl-8">
+            <section class="panel-card mb-4">
+              <div class="panel-head">
+                <div>
+                  <h2 class="section-title">AIサービス稼働状況</h2>
+                  <div class="small text-secondary mt-1">ステータス・使用量・最新確認時刻</div>
+                </div>
+                <select class="form-select form-select-sm" style="width:auto">
+                  <option>すべて表示</option>
+                  <option>正常</option>
+                  <option>障害・注意</option>
+                </select>
+              </div>
+
+              <div class="panel-body table-wrap">
+                <table class="table service-table align-middle">
+                  <thead>
+                    <tr>
+                      <th>サービス</th>
+                      <th>稼働状況</th>
+                      <th>使用量</th>
+                      <th>最終確認</th>
+                    </tr>
+                  </thead>
+                  <tbody id="serviceRows"></tbody>
+                </table>
+              </div>
+            </section>
+
+            <section class="panel-card">
+              <div class="panel-head">
+                <div>
+                  <h2 class="section-title">リアルタイムイベント</h2>
+                  <div class="small text-secondary mt-1">同期結果と状態変化</div>
+                </div>
+                <span class="badge text-bg-light border">LIVE</span>
+              </div>
+
+              <div class="activity-list" id="activityList"></div>
+            </section>
+          </div>
+
+          <div class="col-12 col-xl-4">
+            <section class="panel-card">
+              <div class="panel-head">
+                <div>
+                  <h2 class="section-title">最新情報</h2>
+                  <div class="small text-secondary mt-1">各サービスの更新・お知らせ</div>
+                </div>
+                <button class="btn btn-sm btn-light border" type="button">すべて見る</button>
+              </div>
+
+              <div class="panel-body">
+                <article class="news-item">
+                  <div class="news-time">12分前</div>
+                  <div class="news-title">ChatGPT：サービスステータス更新</div>
+                  <div class="news-source">OpenAI Status</div>
+                </article>
+                <article class="news-item">
+                  <div class="news-time">38分前</div>
+                  <div class="news-title">Claude：新しいモデル情報を公開</div>
+                  <div class="news-source">Anthropic News</div>
+                </article>
+                <article class="news-item">
+                  <div class="news-time">1時間前</div>
+                  <div class="news-title">Gemini：Workspace連携機能を更新</div>
+                  <div class="news-source">Google AI</div>
+                </article>
+                <article class="news-item">
+                  <div class="news-time">3時間前</div>
+                  <div class="news-title">GitHub Copilot：メンテナンス完了</div>
+                  <div class="news-source">GitHub Status</div>
+                </article>
+              </div>
+            </section>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    const services = [
+      { name:"ChatGPT", short:"OAI", plan:"Plus", status:"ok", statusText:"正常", usage:74, usageText:"74%", checked:"10秒前" },
+      { name:"Claude", short:"AN", plan:"Pro", status:"ok", statusText:"正常", usage:48, usageText:"48%", checked:"14秒前" },
+      { name:"Gemini", short:"G", plan:"Google AI", status:"warn", statusText:"一部遅延", usage:61, usageText:"61%", checked:"8秒前" },
+      { name:"GitHub Copilot", short:"GH", plan:"Pro", status:"ok", statusText:"正常", usage:35, usageText:"35%", checked:"12秒前" },
+      { name:"Perplexity", short:"P", plan:"Pro", status:"ok", statusText:"正常", usage:29, usageText:"29%", checked:"17秒前" }
+    ];
+
+    const statusClass = {
+      ok:"status-ok",
+      warn:"status-warn",
+      down:"status-down"
+    };
+
+    const dotClass = {
+      ok:"text-success",
+      warn:"text-warning",
+      down:"text-danger"
+    };
+
+    function renderServices(){
+      const tbody = document.getElementById("serviceRows");
+      tbody.innerHTML = services.map(service => `
+        <tr>
+          <td>
+            <div class="service-name">
+              <div class="service-logo">${service.short}</div>
+              <div>
+                <div class="service-title">${service.name}</div>
+                <div class="service-meta">${service.plan}</div>
+              </div>
+            </div>
+          </td>
+          <td>
+            <span class="status-pill ${statusClass[service.status]}">
+              <i class="bi bi-circle-fill ${dotClass[service.status]}" style="font-size:.5rem"></i>
+              ${service.statusText}
+            </span>
+          </td>
+          <td class="usage-cell">
+            <div class="usage-label">
+              <span>今月</span>
+              <span>${service.usageText}</span>
+            </div>
+            <div class="progress" role="progressbar" aria-label="${service.name} usage">
+              <div class="progress-bar" style="width:${service.usage}%"></div>
+            </div>
+          </td>
+          <td><span class="small text-secondary">${service.checked}</span></td>
+        </tr>
+      `).join("");
+
+      const healthy = services.filter(s => s.status === "ok").length;
+      document.getElementById("healthyCount").textContent = healthy;
+      document.getElementById("issueCount").textContent = services.length - healthy;
+    }
+
+    const activities = [
+      { title:"Gemini で応答遅延を検知", detail:"Status API: degraded performance", time:"09:51:42", type:"warn" },
+      { title:"ChatGPT 使用量を更新", detail:"月間利用率 73% → 74%", time:"09:51:31", type:"ok" },
+      { title:"全サービス同期完了", detail:"5サービスを正常に取得", time:"09:51:20", type:"ok" }
+    ];
+
+    function renderActivities(){
+      const el = document.getElementById("activityList");
+      el.innerHTML = activities.slice(0, 6).map(item => `
+        <div class="activity">
+          <span class="activity-dot ${item.type === "warn" ? "bg-warning" : "bg-success"}"></span>
+          <div>
+            <div class="activity-title">${item.title}</div>
+            <div class="activity-detail">${item.detail}</div>
+          </div>
+          <div class="activity-time">${item.time}</div>
+        </div>
+      `).join("");
+    }
+
+    function syncNow(manual = false){
+      const buttonIcon = document.getElementById("refreshIcon");
+      buttonIcon.classList.add("refresh-spin");
+
+      setTimeout(() => {
+        const now = new Date();
+        document.getElementById("lastSync").textContent =
+          "最終同期 " + now.toLocaleTimeString("ja-JP", { hour12:false });
+
+        const target = services[Math.floor(Math.random() * services.length)];
+        const delta = Math.random() > .5 ? 1 : -1;
+        target.usage = Math.max(5, Math.min(98, target.usage + delta));
+        target.usageText = target.usage + "%";
+        target.checked = "たった今";
+
+        activities.unshift({
+          title: manual ? "手動同期が完了" : `${target.name} の情報を自動更新`,
+          detail: `${target.name} の稼働状況・使用量を同期`,
+          time: now.toLocaleTimeString("ja-JP", { hour12:false }),
+          type: target.status === "warn" ? "warn" : "ok"
+        });
+
+        renderServices();
+        renderActivities();
+        buttonIcon.classList.remove("refresh-spin");
+      }, 450);
+    }
+
+    document.getElementById("refreshBtn").addEventListener("click", () => syncNow(true));
+
+    renderServices();
+    renderActivities();
+    syncNow(false);
+    setInterval(() => syncNow(false), 10000);
+  </script>
+</body>
+</html>
