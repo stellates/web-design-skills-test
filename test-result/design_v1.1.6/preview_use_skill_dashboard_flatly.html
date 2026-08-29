@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Using AI Dashboard</title>
+
+  <!-- Bulmaswatch Flatly -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulmaswatch@0.8.1/flatly/bulmaswatch.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+  <style>
+    :root {
+      --sidebar-width: 244px;
+      --header-height: 68px;
+      --surface: #ffffff;
+      --canvas: #f4f7f9;
+      --line: #dfe6ea;
+      --muted: #6c7a86;
+      --soft: #edf3f5;
+      --success-soft: #e8f7ef;
+      --warning-soft: #fff5df;
+      --danger-soft: #fdebec;
+    }
+
+    html, body {
+      min-height: 100%;
+      background: var(--canvas);
+    }
+
+    body {
+      color: #27333b;
+    }
+
+    /* App shell: fixed navigation and header with a scrollable content area. */
+    .app-shell {
+      min-height: 100vh;
+    }
+
+    .app-sidebar {
+      position: fixed;
+      inset: 0 auto 0 0;
+      width: var(--sidebar-width);
+      background: #2c3e50;
+      color: #fff;
+      padding: 24px 18px;
+      z-index: 30;
+    }
+
+    .app-brand {
+      padding: 4px 10px 23px;
+      border-bottom: 1px solid rgba(255,255,255,.14);
+      margin-bottom: 20px;
+    }
+
+    .app-brand__title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      letter-spacing: .01em;
+      color: #fff;
+    }
+
+    .sidebar-label {
+      color: rgba(255,255,255,.58);
+      font-size: .71rem;
+      font-weight: 700;
+      letter-spacing: .08em;
+      margin: 22px 10px 8px;
+    }
+
+    .sidebar-link {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      min-height: 42px;
+      padding: 10px 12px;
+      margin-bottom: 6px;
+      border-radius: 5px;
+      color: rgba(255,255,255,.82);
+      font-weight: 600;
+      font-size: .92rem;
+    }
+
+    .sidebar-link:hover {
+      background: rgba(255,255,255,.08);
+      color: #fff;
+    }
+
+    .sidebar-link.is-active {
+      background: #18bc9c;
+      color: #fff;
+    }
+
+    .sidebar-link .service-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #9be4d6;
+      flex: 0 0 auto;
+    }
+
+    .app-header {
+      position: fixed;
+      top: 0;
+      left: var(--sidebar-width);
+      right: 0;
+      height: var(--header-height);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 30px;
+      background: rgba(255,255,255,.97);
+      border-bottom: 1px solid var(--line);
+      z-index: 20;
+    }
+
+    .header-title {
+      margin: 0;
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: #2c3e50;
+    }
+
+    .sync-state {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: #52616b;
+      font-size: .87rem;
+      font-weight: 600;
+    }
+
+    .sync-state__dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: #f39c12;
+      box-shadow: 0 0 0 4px rgba(243,156,18,.12);
+    }
+
+    .app-main {
+      margin-left: var(--sidebar-width);
+      padding: calc(var(--header-height) + 28px) 30px 34px;
+    }
+
+    .page-intro {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 24px;
+      margin-bottom: 22px;
+    }
+
+    .page-intro h1 {
+      margin: 0 0 7px;
+      font-size: 1.72rem;
+      font-weight: 700;
+      color: #263746;
+    }
+
+    .page-intro p {
+      margin: 0;
+      color: var(--muted);
+      font-size: .93rem;
+    }
+
+    .summary-strip {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      overflow: hidden;
+      margin-bottom: 24px;
+    }
+
+    .summary-item {
+      padding: 18px 20px;
+      border-right: 1px solid var(--line);
+    }
+
+    .summary-item:last-child {
+      border-right: 0;
+    }
+
+    .summary-item__label {
+      color: var(--muted);
+      font-size: .78rem;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    .summary-item__value {
+      font-size: 1.45rem;
+      line-height: 1.2;
+      font-weight: 700;
+      color: #2c3e50;
+    }
+
+    .summary-item__note {
+      margin-top: 4px;
+      color: #7c8b95;
+      font-size: .76rem;
+    }
+
+    /* Service cards keep the three required information types in one horizontal scan. */
+    .services-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 18px;
+    }
+
+    .service-card {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      overflow: hidden;
+      min-width: 0;
+    }
+
+    .service-card__header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 17px 18px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .service-name {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 1.02rem;
+      font-weight: 700;
+      color: #2c3e50;
+    }
+
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 9px;
+      border-radius: 999px;
+      font-size: .73rem;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .status-pill.is-ok {
+      color: #148b73;
+      background: var(--success-soft);
+    }
+
+    .status-pill.is-warn {
+      color: #a86d00;
+      background: var(--warning-soft);
+    }
+
+    .service-section {
+      padding: 17px 18px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .service-section:last-child {
+      border-bottom: 0;
+    }
+
+    .section-label {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      margin-bottom: 11px;
+      color: #53636e;
+      font-size: .76rem;
+      font-weight: 700;
+    }
+
+    .section-label i {
+      color: #18bc9c;
+    }
+
+    .incident-text {
+      font-size: .9rem;
+      line-height: 1.55;
+      color: #34434c;
+    }
+
+    .news-item {
+      font-size: .88rem;
+      line-height: 1.5;
+      color: #34434c;
+    }
+
+    .news-date {
+      display: block;
+      margin-top: 6px;
+      color: #85929b;
+      font-size: .72rem;
+    }
+
+    .usage-row {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 8px;
+    }
+
+    .usage-value {
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: #2c3e50;
+    }
+
+    .usage-unit {
+      color: var(--muted);
+      font-size: .78rem;
+      font-weight: 600;
+    }
+
+    .usage-track {
+      height: 7px;
+      border-radius: 999px;
+      background: #e7edef;
+      overflow: hidden;
+    }
+
+    .usage-track > span {
+      display: block;
+      height: 100%;
+      background: #18bc9c;
+      border-radius: inherit;
+    }
+
+    .usage-caption {
+      margin-top: 7px;
+      color: #81909a;
+      font-size: .72rem;
+    }
+
+    .source-note {
+      margin-top: 18px;
+      padding: 13px 15px;
+      border-left: 3px solid #18bc9c;
+      background: #eef7f5;
+      color: #53636e;
+      font-size: .78rem;
+      line-height: 1.5;
+    }
+
+    @media (max-width: 1100px) {
+      .services-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .summary-strip {
+        grid-template-columns: 1fr;
+      }
+
+      .summary-item {
+        border-right: 0;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .summary-item:last-child {
+        border-bottom: 0;
+      }
+    }
+
+    @media (max-width: 760px) {
+      .app-sidebar {
+        position: static;
+        width: auto;
+      }
+
+      .app-header {
+        position: static;
+        height: auto;
+        left: 0;
+        padding: 15px 18px;
+      }
+
+      .app-main {
+        margin-left: 0;
+        padding: 22px 18px 28px;
+      }
+
+      .page-intro {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="app-sidebar" aria-label="メインナビゲーション">
+      <div class="app-brand">
+        <div class="app-brand__title">Using AI Dashboard</div>
+      </div>
+
+      <nav>
+        <a class="sidebar-link is-active" href="#dashboard" aria-current="page">
+          <i class="bi bi-grid-1x2-fill"></i>
+          <span>ダッシュボード</span>
+        </a>
+
+        <div class="sidebar-label">利用中サービス</div>
+
+        <a class="sidebar-link" href="#chatgpt">
+          <span class="service-dot"></span>
+          <span>ChatGPT</span>
+        </a>
+        <a class="sidebar-link" href="#claude">
+          <span class="service-dot"></span>
+          <span>Claude</span>
+        </a>
+        <a class="sidebar-link" href="#gemini">
+          <span class="service-dot"></span>
+          <span>Gemini</span>
+        </a>
+      </nav>
+    </aside>
+
+    <header class="app-header">
+      <h2 class="header-title">AIサービス稼働状況</h2>
+      <div class="sync-state" aria-label="リアルタイム同期状態">
+        <span class="sync-state__dot"></span>
+        <span>リアルタイム同期：接続待ち</span>
+      </div>
+    </header>
+
+    <main class="app-main" id="dashboard">
+      <section class="page-intro">
+        <div>
+          <h1>利用状況</h1>
+          <p>利用中AIサービスの障害情報・最新情報・使用量をまとめて確認できます。</p>
+        </div>
+      </section>
+
+      <section class="summary-strip" aria-label="全体サマリー">
+        <div class="summary-item">
+          <div class="summary-item__label">利用中サービス</div>
+          <div class="summary-item__value">3</div>
+          <div class="summary-item__note">モックデータ</div>
+        </div>
+        <div class="summary-item">
+          <div class="summary-item__label">障害発生中</div>
+          <div class="summary-item__value">0</div>
+          <div class="summary-item__note">サービスステータス例</div>
+        </div>
+        <div class="summary-item">
+          <div class="summary-item__label">同期状態</div>
+          <div class="summary-item__value">接続待ち</div>
+          <div class="summary-item__note">API未接続</div>
+        </div>
+      </section>
+
+      <section class="services-grid" aria-label="AIサービス一覧">
+        <article class="service-card" id="chatgpt">
+          <div class="service-card__header">
+            <div class="service-name">
+              <i class="bi bi-chat-square-dots"></i>
+              <span>ChatGPT</span>
+            </div>
+            <span class="status-pill is-ok">
+              <i class="bi bi-check-circle-fill"></i> 正常
+            </span>
+          </div>
+
+          <div class="service-section">
+            <div class="section-label">
+              <i class="bi bi-activity"></i>
+              <span>稼働状況</span>
+            </div>
+            <div class="incident-text">現在、確認中の障害はありません。</div>
+          </div>
+
+          <div class="service-section">
+            <div class="section-label">
+              <i class="bi bi-newspaper"></i>
+              <span>最新情報</span>
+            </div>
+            <div class="news-item">
+              新しいモデル／機能アップデートの情報をここに表示します。
+              <span class="news-date">モック表示</span>
+            </div>
+          </div>
+
+          <div class="service-section">
+            <div class="section-label">
+              <i class="bi bi-bar-chart-line"></i>
+              <span>使用量</span>
+            </div>
+            <div class="usage-row">
+              <span class="usage-value">68%</span>
+              <span class="usage-unit">現在の利用枠</span>
+            </div>
+            <div class="usage-track" aria-hidden="true"><span style="width:68%"></span></div>
+            <div class="usage-caption">利用枠情報の表示例</div>
+          </div>
+        </article>
+
+        <article class="service-card" id="claude">
+          <div class="service-card__header">
+            <div class="service-name">
+              <i class="bi bi-chat-square-dots"></i>
+              <span>Claude</span>
+            </div>
+            <span class="status-pill is-ok">
+              <i class="bi bi-check-circle-fill"></i> 正常
+            </span>
+          </div>
+
+          <div class="service-section">
+            <div class="section-label">
+              <i class="bi bi-activity"></i>
+              <span>稼働状況</span>
+            </div>
+            <div class="incident-text">現在、確認中の障害はありません。</div>
+          </div>
+
+          <div class="service-section">
+            <div class="section-label">
+              <i class="bi bi-newspaper"></i>
+              <span>最新情報</span>
+            </div>
+            <div class="news-item">
+              サービス更新やリリース情報をここに表示します。
+              <span class="news-date">モック表示</span>
+            </div>
+          </div>
+
+          <div class="service-section">
+            <div class="section-label">
+              <i class="bi bi-bar-chart-line"></i>
+              <span>使用量</span>
+            </div>
+            <div class="usage-row">
+              <span class="usage-value">42%</span>
+              <span class="usage-unit">現在の利用枠</span>
+            </div>
+            <div class="usage-track" aria-hidden="true"><span style="width:42%"></span></div>
+            <div class="usage-caption">利用枠情報の表示例</div>
+          </div>
+        </article>
+
+        <article class="service-card" id="gemini">
+          <div class="service-card__header">
+            <div class="service-name">
+              <i class="bi bi-chat-square-dots"></i>
+              <span>Gemini</span>
+            </div>
+            <span class="status-pill is-warn">
+              <i class="bi bi-exclamation-circle-fill"></i> 情報確認中
+            </span>
+          </div>
+
+          <div class="service-section">
+            <div class="section-label">
+              <i class="bi bi-activity"></i>
+              <span>稼働状況</span>
+            </div>
+            <div class="incident-text">ステータスAPI接続後に最新状態を表示します。</div>
+          </div>
+
+          <div class="service-section">
+            <div class="section-label">
+              <i class="bi bi-newspaper"></i>
+              <span>最新情報</span>
+            </div>
+            <div class="news-item">
+              サービス更新やリリース情報をここに表示します。
+              <span class="news-date">モック表示</span>
+            </div>
+          </div>
+
+          <div class="service-section">
+            <div class="section-label">
+              <i class="bi bi-bar-chart-line"></i>
+              <span>使用量</span>
+            </div>
+            <div class="usage-row">
+              <span class="usage-value">55%</span>
+              <span class="usage-unit">現在の利用枠</span>
+            </div>
+            <div class="usage-track" aria-hidden="true"><span style="width:55%"></span></div>
+            <div class="usage-caption">利用枠情報の表示例</div>
+          </div>
+        </article>
+      </section>
+
+      <div class="source-note">
+        現在はUI確認用のモックデータです。リアルタイム同期は、各AIサービスのステータス・更新情報・使用量を取得するAPIやデータソースを接続した時点で有効化する想定です。
+      </div>
+    </main>
+  </div>
+</body>
+</html>

@@ -1,0 +1,376 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AI備忘録</title>
+  <meta name="description" content="作者がAIを利用した記録をブログ形式で掲載する備忘録サイト">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulmaswatch@0.8.1/litera/bulmaswatch.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+  <style>
+
+/* ページ全体の読みやすさと、Literaの文芸的な雰囲気を活かすための調整 */
+:root {
+  --page-bg: #f7f5f1;
+  --surface: #ffffff;
+  --ink: #2b2b2b;
+  --muted: #716d68;
+  --line: #e7e1d9;
+  --accent: #4582ec;
+  --accent-soft: #edf4ff;
+}
+
+html {
+  background: var(--page-bg);
+}
+
+body {
+  color: var(--ink);
+  background:
+    linear-gradient(180deg, #ffffff 0, #ffffff 260px, var(--page-bg) 260px);
+  min-height: 100vh;
+}
+
+.site-shell {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+}
+
+.site-navbar {
+  border-bottom: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.96);
+}
+
+.site-navbar .navbar-brand .navbar-item {
+  font-family: Georgia, "Times New Roman", "Yu Mincho", "Hiragino Mincho ProN", serif;
+  font-size: 1.35rem;
+  letter-spacing: 0.04em;
+  color: var(--ink);
+}
+
+.site-navbar .navbar-item.is-current {
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.intro {
+  padding: 4.4rem 0 2.8rem;
+}
+
+.intro .title {
+  font-family: Georgia, "Times New Roman", "Yu Mincho", "Hiragino Mincho ProN", serif;
+  font-size: clamp(2.2rem, 5vw, 4rem);
+  letter-spacing: -0.02em;
+  margin-bottom: 1rem;
+}
+
+.intro .subtitle {
+  color: var(--muted);
+  max-width: 720px;
+  line-height: 1.9;
+}
+
+.section-heading {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.35rem;
+}
+
+.section-heading .title {
+  margin-bottom: 0;
+}
+
+.section-heading .title::after {
+  content: "";
+  display: block;
+  width: 42px;
+  height: 3px;
+  margin-top: 0.55rem;
+  background: var(--accent);
+}
+
+.latest-article {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  box-shadow: 0 18px 45px rgba(62, 53, 43, 0.07);
+  overflow: hidden;
+}
+
+.latest-article .latest-accent {
+  min-height: 100%;
+  background:
+    radial-gradient(circle at 18% 20%, rgba(69, 130, 236, 0.22), transparent 32%),
+    linear-gradient(145deg, #f6f8fb 0%, #eef3f9 55%, #e7edf5 100%);
+  display: flex;
+  align-items: flex-end;
+  padding: 2rem;
+}
+
+.latest-article .latest-accent .icon {
+  width: auto;
+  height: auto;
+  color: var(--accent);
+  font-size: 4rem;
+  opacity: 0.9;
+}
+
+.latest-content {
+  padding: clamp(2rem, 5vw, 4rem);
+}
+
+.latest-content .tag {
+  margin-bottom: 1rem;
+}
+
+.article-meta {
+  color: var(--muted);
+  font-size: 0.92rem;
+}
+
+.article-title {
+  font-family: Georgia, "Times New Roman", "Yu Mincho", "Hiragino Mincho ProN", serif;
+  line-height: 1.45;
+}
+
+.article-excerpt {
+  color: #57524d;
+  line-height: 1.95;
+}
+
+.read-link {
+  font-weight: 700;
+}
+
+.read-link .icon {
+  transition: transform 0.2s ease;
+}
+
+.read-link:hover .icon {
+  transform: translateX(4px);
+}
+
+/* 人気記事は順位を強く見せつつ、カードを過剰に分断しない構成 */
+.popular-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.popular-item {
+  position: relative;
+  background: var(--surface);
+  border-top: 4px solid var(--accent);
+  padding: 1.5rem 1.45rem 1.6rem;
+  min-height: 255px;
+  box-shadow: 0 10px 28px rgba(62, 53, 43, 0.05);
+}
+
+.popular-rank {
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 2.7rem;
+  line-height: 1;
+  color: #d7e4fb;
+  margin-bottom: 1rem;
+}
+
+.popular-item .title {
+  font-family: Georgia, "Times New Roman", "Yu Mincho", "Hiragino Mincho ProN", serif;
+  line-height: 1.55;
+}
+
+.archive-cta {
+  margin: 4rem 0 5rem;
+  background: var(--accent-soft);
+  border: 1px solid #d6e5ff;
+  padding: 2.1rem 2.25rem;
+}
+
+.archive-cta-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+}
+
+.archive-cta .title {
+  margin-bottom: 0.45rem;
+}
+
+.archive-cta p {
+  color: var(--muted);
+}
+
+.site-footer {
+  border-top: 1px solid var(--line);
+  padding: 2rem 0 2.5rem;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+/* 記事一覧画面は本文を読み進めやすい一列レイアウトにする */
+.archive-list {
+  background: var(--surface);
+  border: 1px solid var(--line);
+}
+
+.archive-row {
+  display: grid;
+  grid-template-columns: 130px 1fr auto;
+  align-items: center;
+  gap: 1.25rem;
+  padding: 1.35rem 1.5rem;
+  border-bottom: 1px solid var(--line);
+}
+
+.archive-row:last-child {
+  border-bottom: 0;
+}
+
+.archive-row .date {
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.archive-row .title {
+  margin: 0;
+  font-family: Georgia, "Times New Roman", "Yu Mincho", "Hiragino Mincho ProN", serif;
+  font-size: 1.15rem;
+  line-height: 1.5;
+}
+
+@media (max-width: 768px) {
+  body {
+    background: var(--page-bg);
+  }
+
+  .intro {
+    padding-top: 2.7rem;
+  }
+
+  .latest-article .latest-accent {
+    min-height: 180px;
+  }
+
+  .popular-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .archive-cta-inner {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .archive-row {
+    grid-template-columns: 1fr auto;
+  }
+
+  .archive-row .date {
+    grid-column: 1 / -1;
+  }
+}
+
+</style>
+</head>
+<body>
+  <nav class="navbar site-navbar" role="navigation" aria-label="メインナビゲーション">
+    <div class="site-shell navbar-menu is-active">
+      <div class="navbar-brand">
+        <a class="navbar-item" href="index.html">AI備忘録</a>
+      </div>
+      <div class="navbar-end">
+        <a class="navbar-item is-current" href="index.html">ホーム</a>
+        <a class="navbar-item" href="#archive">過去記事</a>
+      </div>
+    </div>
+  </nav>
+
+  <main>
+    <section class="intro">
+      <div class="site-shell">
+        <h1 class="title">AIと試したことを、<br>忘れないために。</h1>
+        <p class="subtitle">
+          生成AIを使って試したこと、分かったこと、うまくいかなかったことを記録する備忘録です。
+        </p>
+      </div>
+    </section>
+
+    <section class="section pb-5">
+      <div class="site-shell">
+        <div class="section-heading">
+          <h2 class="title is-4">最新記事</h2>
+        </div>
+
+        <article class="latest-article columns is-gapless">
+          <div class="column is-4 latest-accent" aria-hidden="true">
+            <span class="icon"><i class="bi bi-journal-text"></i></span>
+          </div>
+          <div class="column latest-content">
+            <span class="tag is-link is-light">最新</span>
+            <p class="article-meta mb-3">2026年8月29日</p>
+            <h3 class="title is-3 article-title">AIにWebデザインのルールを渡すと、画面はどこまで安定するのか</h3>
+            <p class="article-excerpt mb-5">
+              Bulmaとテーマ指定、情報設計のルールをまとめたSkillを使い、同じ要件から生成される画面の差を見比べた記録。
+              見た目を縛りすぎず、暴走もしにくい指示の境界を探ります。
+            </p>
+            <a class="read-link" href="#" aria-label="最新記事を読む">
+              記事を読む
+              <span class="icon is-small"><i class="bi bi-arrow-right"></i></span>
+            </a>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="site-shell">
+        <div class="section-heading">
+          <h2 class="title is-4">人気トップ3</h2>
+        </div>
+
+        <div class="popular-grid">
+          <article class="popular-item">
+            <div class="popular-rank">01</div>
+            <p class="article-meta mb-3">2026年8月21日</p>
+            <h3 class="title is-5">ローカルLLMを触って分かった「速さ」と「賢さ」のちょうどいい所</h3>
+            <a class="read-link" href="#">読む <span class="icon is-small"><i class="bi bi-arrow-right"></i></span></a>
+          </article>
+
+          <article class="popular-item">
+            <div class="popular-rank">02</div>
+            <p class="article-meta mb-3">2026年8月18日</p>
+            <h3 class="title is-5">RAGは何でもベクトル化すれば良い、ではなかった</h3>
+            <a class="read-link" href="#">読む <span class="icon is-small"><i class="bi bi-arrow-right"></i></span></a>
+          </article>
+
+          <article class="popular-item">
+            <div class="popular-rank">03</div>
+            <p class="article-meta mb-3">2026年8月10日</p>
+            <h3 class="title is-5">AIコーディングで作る速度より、レビューする速度が先に限界へ来る</h3>
+            <a class="read-link" href="#">読む <span class="icon is-small"><i class="bi bi-arrow-right"></i></span></a>
+          </article>
+        </div>
+
+        <div class="archive-cta">
+          <div class="archive-cta-inner">
+            <div>
+              <h2 class="title is-5">過去の記事を読む</h2>
+              <p>これまでに記録した記事を新しい順に一覧できます。</p>
+            </div>
+            <a class="button is-link" href="#archive">
+              過去記事一覧へ
+              <span class="icon"><i class="bi bi-arrow-right"></i></span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="site-shell">AI備忘録</div>
+  </footer>
+</body>
+</html>
