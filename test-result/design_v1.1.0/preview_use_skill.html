@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Using AI Dashboard</title>
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulmaswatch@0.8.1/flatly/bulmaswatch.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+  <style>
+    :root {
+      --page-bg: #f5f7f8;
+      --line: #dfe5e8;
+      --muted: #6b7780;
+      --sidebar-width: 220px;
+    }
+
+    html, body {
+      min-height: 100%;
+      background: var(--page-bg);
+    }
+
+    body {
+      color: #2f3b43;
+    }
+
+    .app-shell {
+      min-height: 100vh;
+      display: flex;
+    }
+
+    .sidebar {
+      width: var(--sidebar-width);
+      background: #ffffff;
+      border-right: 1px solid var(--line);
+      padding: 1.25rem 1rem;
+      position: fixed;
+      inset: 0 auto 0 0;
+      overflow-y: auto;
+    }
+
+    .brand {
+      padding: 0 .5rem 1.1rem;
+      border-bottom: 1px solid var(--line);
+      margin-bottom: 1rem;
+    }
+
+    .brand-title {
+      font-weight: 700;
+      font-size: 1.05rem;
+      color: #2c3e50;
+    }
+
+    .brand-subtitle {
+      margin-top: .2rem;
+      font-size: .76rem;
+      color: var(--muted);
+    }
+
+    .menu-list a {
+      border-radius: 4px;
+      color: #42515a;
+      padding: .65rem .75rem;
+    }
+
+    .menu-list a.is-active {
+      background: #2c3e50;
+      color: #fff;
+    }
+
+    .menu-list .icon {
+      width: 1.3rem;
+      margin-right: .35rem;
+    }
+
+    .sidebar-footer {
+      position: absolute;
+      left: 1rem;
+      right: 1rem;
+      bottom: 1rem;
+      padding-top: .9rem;
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      font-size: .75rem;
+    }
+
+    .main {
+      margin-left: var(--sidebar-width);
+      width: calc(100% - var(--sidebar-width));
+      min-width: 0;
+    }
+
+    .topbar {
+      background: #ffffff;
+      border-bottom: 1px solid var(--line);
+      padding: .85rem 1.5rem;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    .topbar .level {
+      margin-bottom: 0;
+    }
+
+    .page-title {
+      font-size: 1.2rem;
+      font-weight: 700;
+      margin: 0;
+    }
+
+    .page-subtitle {
+      color: var(--muted);
+      font-size: .8rem;
+      margin-top: .15rem;
+    }
+
+    .content-wrap {
+      padding: 1.25rem 1.5rem 2rem;
+      max-width: 1600px;
+    }
+
+    .summary-box,
+    .section-box {
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 5px;
+      box-shadow: none;
+    }
+
+    .summary-box {
+      padding: 1rem 1.1rem;
+      height: 100%;
+    }
+
+    .summary-label {
+      color: var(--muted);
+      font-size: .76rem;
+      margin-bottom: .25rem;
+    }
+
+    .summary-value {
+      font-size: 1.55rem;
+      font-weight: 700;
+      line-height: 1.15;
+    }
+
+    .summary-meta {
+      margin-top: .35rem;
+      font-size: .78rem;
+      color: var(--muted);
+    }
+
+    .summary-icon {
+      color: #18bc9c;
+      font-size: 1.2rem;
+    }
+
+    .section-box {
+      padding: 1rem 1.1rem;
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-bottom: .85rem;
+    }
+
+    .section-title {
+      font-size: 1rem;
+      font-weight: 700;
+      margin: 0;
+    }
+
+    .section-actions {
+      display: flex;
+      align-items: center;
+      gap: .45rem;
+      flex-wrap: wrap;
+    }
+
+    .sync-state {
+      display: inline-flex;
+      align-items: center;
+      gap: .35rem;
+      color: #15967d;
+      font-size: .78rem;
+      white-space: nowrap;
+    }
+
+    .sync-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #18bc9c;
+      display: inline-block;
+    }
+
+    .service-table th {
+      color: #65717a;
+      font-size: .74rem;
+      font-weight: 600;
+      border-bottom-width: 1px;
+      white-space: nowrap;
+    }
+
+    .service-table td {
+      vertical-align: middle;
+      border-bottom-color: #edf0f2;
+      padding-top: .85rem;
+      padding-bottom: .85rem;
+    }
+
+    .service-name {
+      font-weight: 700;
+    }
+
+    .service-note {
+      font-size: .73rem;
+      color: var(--muted);
+      margin-top: .15rem;
+    }
+
+    .status-cell {
+      white-space: nowrap;
+    }
+
+    .status-indicator {
+      display: inline-flex;
+      align-items: center;
+      gap: .4rem;
+      font-weight: 600;
+      font-size: .82rem;
+    }
+
+    .status-indicator::before {
+      content: "";
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      display: inline-block;
+      background: #18bc9c;
+    }
+
+    .status-indicator.warning::before {
+      background: #f39c12;
+    }
+
+    .status-indicator.danger::before {
+      background: #e74c3c;
+    }
+
+    .usage-bar {
+      width: 160px;
+      max-width: 100%;
+    }
+
+    .usage-number {
+      font-size: .8rem;
+      margin-bottom: .3rem;
+      display: flex;
+      justify-content: space-between;
+      gap: .5rem;
+    }
+
+    progress.progress {
+      height: .42rem;
+      margin-bottom: 0;
+    }
+
+    .news-list {
+      margin: 0;
+    }
+
+    .news-item {
+      padding: .85rem 0;
+      border-bottom: 1px solid #edf0f2;
+    }
+
+    .news-item:first-child {
+      padding-top: 0;
+    }
+
+    .news-item:last-child {
+      border-bottom: 0;
+      padding-bottom: 0;
+    }
+
+    .news-meta {
+      color: var(--muted);
+      font-size: .72rem;
+      margin-bottom: .2rem;
+    }
+
+    .news-title {
+      color: #2c3e50;
+      font-size: .86rem;
+      line-height: 1.45;
+      font-weight: 600;
+    }
+
+    .mini-list {
+      margin-top: .4rem;
+    }
+
+    .mini-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
+      padding: .55rem 0;
+      border-bottom: 1px solid #edf0f2;
+      font-size: .82rem;
+    }
+
+    .mini-row:last-child {
+      border-bottom: 0;
+    }
+
+    .mini-row .muted {
+      color: var(--muted);
+    }
+
+    .filter-group .button.is-selected {
+      background: #2c3e50;
+      border-color: #2c3e50;
+      color: #fff;
+    }
+
+    .mobile-menu-button {
+      display: none;
+    }
+
+    @media (max-width: 1023px) {
+      .sidebar {
+        transform: translateX(-100%);
+        transition: transform .2s ease;
+        z-index: 30;
+      }
+
+      .sidebar.is-open {
+        transform: translateX(0);
+      }
+
+      .main {
+        margin-left: 0;
+        width: 100%;
+      }
+
+      .mobile-menu-button {
+        display: inline-flex;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .content-wrap {
+        padding: 1rem;
+      }
+
+      .topbar {
+        padding: .75rem 1rem;
+      }
+
+      .service-table {
+        min-width: 760px;
+      }
+
+      .table-container {
+        overflow-x: auto;
+      }
+
+      .section-header {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+
+<body>
+<div class="app-shell">
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">
+      <div class="brand-title">Using AI Dashboard</div>
+      <div class="brand-subtitle">AI service operations</div>
+    </div>
+
+    <nav class="menu">
+      <ul class="menu-list">
+        <li><a class="is-active"><span class="icon"><i class="bi bi-grid-1x2"></i></span>ダッシュボード</a></li>
+        <li><a><span class="icon"><i class="bi bi-hdd-network"></i></span>サービス</a></li>
+        <li><a><span class="icon"><i class="bi bi-bar-chart"></i></span>使用量</a></li>
+        <li><a><span class="icon"><i class="bi bi-newspaper"></i></span>最新情報</a></li>
+        <li><a><span class="icon"><i class="bi bi-bell"></i></span>通知設定</a></li>
+      </ul>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div><i class="bi bi-arrow-repeat"></i> 自動同期: 有効</div>
+      <div id="sidebarSyncTime">最終同期 10:47:12</div>
+    </div>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+      <nav class="level is-mobile">
+        <div class="level-left">
+          <div class="level-item">
+            <button class="button is-small mobile-menu-button" id="menuToggle" aria-label="メニューを開く">
+              <span class="icon"><i class="bi bi-list"></i></span>
+            </button>
+          </div>
+          <div class="level-item">
+            <div>
+              <h1 class="page-title">ダッシュボード</h1>
+              <div class="page-subtitle">利用中のAIサービスをまとめて確認</div>
+            </div>
+          </div>
+        </div>
+        <div class="level-right">
+          <div class="level-item">
+            <span class="sync-state">
+              <span class="sync-dot"></span>
+              リアルタイム同期中
+            </span>
+          </div>
+          <div class="level-item">
+            <button class="button is-small is-primary" id="syncButton">
+              <span class="icon"><i class="bi bi-arrow-clockwise"></i></span>
+              <span>今すぐ同期</span>
+            </button>
+          </div>
+        </div>
+      </nav>
+    </header>
+
+    <div class="content-wrap">
+      <section class="columns is-variable is-3 mb-4">
+        <div class="column">
+          <div class="summary-box">
+            <div class="level is-mobile mb-0">
+              <div class="level-left">
+                <div>
+                  <div class="summary-label">稼働中サービス</div>
+                  <div class="summary-value">5 / 5</div>
+                  <div class="summary-meta">重大障害なし</div>
+                </div>
+              </div>
+              <div class="level-right">
+                <span class="summary-icon"><i class="bi bi-check-circle-fill"></i></span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="column">
+          <div class="summary-box">
+            <div class="summary-label">今月の推定利用額</div>
+            <div class="summary-value">¥18,420</div>
+            <div class="summary-meta">予算 ¥30,000 の 61%</div>
+          </div>
+        </div>
+
+        <div class="column">
+          <div class="summary-box">
+            <div class="summary-label">残り利用枠</div>
+            <div class="summary-value">38%</div>
+            <div class="summary-meta">最も少ないサービス基準</div>
+          </div>
+        </div>
+
+        <div class="column">
+          <div class="summary-box">
+            <div class="summary-label">未確認の更新情報</div>
+            <div class="summary-value">6件</div>
+            <div class="summary-meta">過去24時間に3件追加</div>
+          </div>
+        </div>
+      </section>
+
+      <div class="columns is-variable is-4">
+        <div class="column is-8">
+          <section class="section-box mb-4">
+            <div class="section-header">
+              <h2 class="section-title">サービス状況</h2>
+              <div class="section-actions">
+                <div class="buttons has-addons are-small filter-group mb-0">
+                  <button class="button is-selected" data-filter="all">すべて</button>
+                  <button class="button" data-filter="attention">要確認</button>
+                </div>
+                <span class="has-text-grey is-size-7" id="lastSync">10:47:12 更新</span>
+              </div>
+            </div>
+
+            <div class="table-container">
+              <table class="table is-fullwidth service-table">
+                <thead>
+                  <tr>
+                    <th>サービス</th>
+                    <th>稼働状況</th>
+                    <th>使用量</th>
+                    <th>今月の利用額</th>
+                    <th>更新</th>
+                  </tr>
+                </thead>
+                <tbody id="serviceTable">
+                  <tr data-state="ok">
+                    <td>
+                      <div class="service-name">ChatGPT</div>
+                      <div class="service-note">OpenAI</div>
+                    </td>
+                    <td class="status-cell"><span class="status-indicator">正常</span></td>
+                    <td>
+                      <div class="usage-bar">
+                        <div class="usage-number"><span>Plus 利用枠</span><span>62%</span></div>
+                        <progress class="progress is-primary" value="62" max="100">62%</progress>
+                      </div>
+                    </td>
+                    <td>¥3,000</td>
+                    <td class="has-text-grey is-size-7">12秒前</td>
+                  </tr>
+
+                  <tr data-state="attention">
+                    <td>
+                      <div class="service-name">Claude</div>
+                      <div class="service-note">Anthropic</div>
+                    </td>
+                    <td class="status-cell"><span class="status-indicator warning">一部遅延</span></td>
+                    <td>
+                      <div class="usage-bar">
+                        <div class="usage-number"><span>週次上限</span><span>71%</span></div>
+                        <progress class="progress is-warning" value="71" max="100">71%</progress>
+                      </div>
+                    </td>
+                    <td>¥3,100</td>
+                    <td class="has-text-grey is-size-7">18秒前</td>
+                  </tr>
+
+                  <tr data-state="ok">
+                    <td>
+                      <div class="service-name">Gemini</div>
+                      <div class="service-note">Google</div>
+                    </td>
+                    <td class="status-cell"><span class="status-indicator">正常</span></td>
+                    <td>
+                      <div class="usage-bar">
+                        <div class="usage-number"><span>Pro 利用量</span><span>44%</span></div>
+                        <progress class="progress is-info" value="44" max="100">44%</progress>
+                      </div>
+                    </td>
+                    <td>¥2,900</td>
+                    <td class="has-text-grey is-size-7">9秒前</td>
+                  </tr>
+
+                  <tr data-state="ok">
+                    <td>
+                      <div class="service-name">GitHub Copilot</div>
+                      <div class="service-note">GitHub</div>
+                    </td>
+                    <td class="status-cell"><span class="status-indicator">正常</span></td>
+                    <td>
+                      <div class="usage-bar">
+                        <div class="usage-number"><span>Premium requests</span><span>36%</span></div>
+                        <progress class="progress is-link" value="36" max="100">36%</progress>
+                      </div>
+                    </td>
+                    <td>¥1,480</td>
+                    <td class="has-text-grey is-size-7">21秒前</td>
+                  </tr>
+
+                  <tr data-state="ok">
+                    <td>
+                      <div class="service-name">Perplexity</div>
+                      <div class="service-note">Perplexity AI</div>
+                    </td>
+                    <td class="status-cell"><span class="status-indicator">正常</span></td>
+                    <td>
+                      <div class="usage-bar">
+                        <div class="usage-number"><span>Pro searches</span><span>28%</span></div>
+                        <progress class="progress is-success" value="28" max="100">28%</progress>
+                      </div>
+                    </td>
+                    <td>¥2,950</td>
+                    <td class="has-text-grey is-size-7">15秒前</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
+
+          <section class="section-box">
+            <div class="section-header">
+              <h2 class="section-title">利用量の推移</h2>
+              <div class="buttons has-addons are-small mb-0">
+                <button class="button">7日</button>
+                <button class="button is-primary">30日</button>
+              </div>
+            </div>
+
+            <div class="columns is-mobile is-multiline">
+              <div class="column is-6">
+                <div class="summary-label">リクエスト数</div>
+                <div class="summary-value is-size-4">12,846</div>
+                <div class="summary-meta">前月比 +8.4%</div>
+              </div>
+              <div class="column is-6">
+                <div class="summary-label">利用額</div>
+                <div class="summary-value is-size-4">¥18,420</div>
+                <div class="summary-meta">前月比 -3.1%</div>
+              </div>
+            </div>
+
+            <div class="mini-list">
+              <div class="mini-row"><span>ChatGPT</span><span class="muted">4,302 requests</span></div>
+              <div class="mini-row"><span>Claude</span><span class="muted">3,118 requests</span></div>
+              <div class="mini-row"><span>Gemini</span><span class="muted">2,940 requests</span></div>
+              <div class="mini-row"><span>その他</span><span class="muted">2,486 requests</span></div>
+            </div>
+          </section>
+        </div>
+
+        <div class="column is-4">
+          <section class="section-box mb-4">
+            <div class="section-header">
+              <h2 class="section-title">最新情報</h2>
+              <button class="button is-small is-light">すべて見る</button>
+            </div>
+
+            <div class="news-list">
+              <article class="news-item">
+                <div class="news-meta">OpenAI ・ 18分前</div>
+                <div class="news-title">ChatGPT の新しいモデル選択オプションが公開されました</div>
+              </article>
+              <article class="news-item">
+                <div class="news-meta">Anthropic ・ 2時間前</div>
+                <div class="news-title">Claude の一部リージョンで応答遅延が発生しています</div>
+              </article>
+              <article class="news-item">
+                <div class="news-meta">Google ・ 5時間前</div>
+                <div class="news-title">Gemini アプリのファイル処理機能が更新されました</div>
+              </article>
+              <article class="news-item">
+                <div class="news-meta">GitHub ・ 昨日</div>
+                <div class="news-title">Copilot の premium request 利用状況表示が改善されました</div>
+              </article>
+            </div>
+          </section>
+
+          <section class="section-box">
+            <div class="section-header">
+              <h2 class="section-title">注意項目</h2>
+            </div>
+
+            <div class="notification is-warning is-light p-3 mb-3">
+              <div class="is-size-7 has-text-weight-semibold mb-1">Claude に一部遅延</div>
+              <div class="is-size-7">現在の障害情報を確認してください。</div>
+            </div>
+
+            <div class="mini-list">
+              <div class="mini-row">
+                <span>Claude 週次利用枠</span>
+                <span class="has-text-warning-dark has-text-weight-semibold">71%</span>
+              </div>
+              <div class="mini-row">
+                <span>予算残額</span>
+                <span class="muted">¥11,580</span>
+              </div>
+              <div class="mini-row">
+                <span>未読更新</span>
+                <span class="muted">6件</span>
+              </div>
+            </div>
+          </section>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script>
+  (() => {
+    const sidebar = document.getElementById('sidebar');
+    const menuToggle = document.getElementById('menuToggle');
+    const syncButton = document.getElementById('syncButton');
+    const lastSync = document.getElementById('lastSync');
+    const sidebarSyncTime = document.getElementById('sidebarSyncTime');
+    const filterButtons = document.querySelectorAll('[data-filter]');
+    const rows = document.querySelectorAll('#serviceTable tr');
+
+    const nowText = () => new Date().toLocaleTimeString('ja-JP', {
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit'
+    });
+
+    const updateSyncTime = () => {
+      const time = nowText();
+      lastSync.textContent = `${time} 更新`;
+      sidebarSyncTime.textContent = `最終同期 ${time}`;
+    };
+
+    menuToggle?.addEventListener('click', () => {
+      sidebar.classList.toggle('is-open');
+    });
+
+    syncButton.addEventListener('click', () => {
+      syncButton.classList.add('is-loading');
+      setTimeout(() => {
+        updateSyncTime();
+        syncButton.classList.remove('is-loading');
+      }, 650);
+    });
+
+    filterButtons.forEach(button => {
+      button.addEventListener('click', () => {
+        filterButtons.forEach(item => item.classList.remove('is-selected'));
+        button.classList.add('is-selected');
+
+        const filter = button.dataset.filter;
+        rows.forEach(row => {
+          row.style.display = (filter === 'all' || row.dataset.state === filter) ? '' : 'none';
+        });
+      });
+    });
+
+    setInterval(updateSyncTime, 30000);
+  })();
+</script>
+</body>
+</html>
