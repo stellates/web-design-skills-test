@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Using AI Dashboard</title>
+  <style>
+    :root{
+      --bg:#0b1020;
+      --panel:#121a2f;
+      --panel-2:#18223b;
+      --text:#f4f7fb;
+      --muted:#95a4bf;
+      --line:#24304d;
+      --accent:#7c5cff;
+      --accent-2:#36c7f4;
+      --ok:#28c76f;
+      --warn:#ffb020;
+      --danger:#ff5a65;
+      --shadow:0 16px 40px rgba(0,0,0,.22);
+      --radius:18px;
+    }
+
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background:
+        radial-gradient(circle at 10% 10%, rgba(124,92,255,.14), transparent 26%),
+        radial-gradient(circle at 90% 0%, rgba(54,199,244,.10), transparent 24%),
+        var(--bg);
+      color:var(--text);
+      min-height:100vh;
+    }
+
+    .app{display:grid;grid-template-columns:240px 1fr;min-height:100vh}
+
+    aside{
+      border-right:1px solid var(--line);
+      background:rgba(8,13,26,.72);
+      backdrop-filter:blur(12px);
+      padding:24px 18px;
+      position:sticky;top:0;height:100vh;
+    }
+
+    .brand{display:flex;align-items:center;gap:12px;font-weight:800;font-size:18px;margin:0 8px 28px}
+    .logo{
+      width:36px;height:36px;border-radius:11px;
+      display:grid;place-items:center;
+      background:linear-gradient(135deg,var(--accent),var(--accent-2));
+      box-shadow:0 8px 24px rgba(124,92,255,.25);
+      font-weight:900;
+    }
+
+    nav a{
+      display:flex;gap:12px;align-items:center;
+      color:var(--muted);text-decoration:none;
+      padding:12px 14px;border-radius:12px;margin-bottom:6px;font-size:14px;
+    }
+    nav a.active{background:var(--panel-2);color:white}
+    nav a:hover{background:rgba(255,255,255,.04);color:white}
+
+    .aside-footer{
+      position:absolute;bottom:24px;left:18px;right:18px;
+      background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px;
+    }
+    .aside-footer small{color:var(--muted)}
+    .sync-mini{display:flex;align-items:center;gap:8px;margin-top:8px;font-size:13px}
+    .dot{width:8px;height:8px;border-radius:50%;background:var(--ok);box-shadow:0 0 0 5px rgba(40,199,111,.10)}
+
+    main{padding:28px 30px 40px;overflow:hidden}
+    .topbar{display:flex;justify-content:space-between;gap:16px;align-items:center;margin-bottom:24px}
+    .title h1{font-size:28px;margin:0 0 6px}
+    .title p{margin:0;color:var(--muted);font-size:14px}
+    .top-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+    .badge{
+      display:inline-flex;align-items:center;gap:8px;
+      border:1px solid var(--line);background:rgba(255,255,255,.03);
+      padding:9px 12px;border-radius:999px;color:var(--muted);font-size:13px;
+    }
+    button{
+      border:0;border-radius:12px;padding:10px 14px;color:white;font-weight:700;
+      background:linear-gradient(135deg,var(--accent),#6548ef);cursor:pointer;
+      box-shadow:0 8px 24px rgba(124,92,255,.24);
+    }
+
+    .summary{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-bottom:18px}
+    .kpi{
+      background:linear-gradient(180deg,rgba(255,255,255,.025),rgba(255,255,255,.01));
+      border:1px solid var(--line);border-radius:var(--radius);padding:18px;box-shadow:var(--shadow);
+    }
+    .kpi-label{font-size:13px;color:var(--muted);margin-bottom:12px}
+    .kpi-value{font-size:26px;font-weight:800;letter-spacing:-.03em}
+    .kpi-sub{font-size:12px;color:var(--muted);margin-top:8px}
+    .ok-text{color:var(--ok)}
+    .warn-text{color:var(--warn)}
+    .danger-text{color:var(--danger)}
+
+    .layout{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(320px,.9fr);gap:18px}
+    .card{
+      background:rgba(18,26,47,.88);border:1px solid var(--line);
+      border-radius:var(--radius);box-shadow:var(--shadow);
+    }
+    .card-head{display:flex;justify-content:space-between;align-items:center;padding:18px 18px 14px}
+    .card-head h2{font-size:16px;margin:0}
+    .card-head span{font-size:12px;color:var(--muted)}
+
+    .service-list{padding:0 12px 12px}
+    .service-row{
+      display:grid;
+      grid-template-columns:minmax(180px,1.2fr) 130px 150px minmax(160px,1fr);
+      gap:14px;align-items:center;padding:14px 8px;border-top:1px solid var(--line);
+    }
+    .service-row:first-child{border-top:0}
+    .service{display:flex;align-items:center;gap:12px;min-width:0}
+    .service-icon{
+      width:40px;height:40px;border-radius:12px;background:var(--panel-2);
+      display:grid;place-items:center;font-weight:800;
+    }
+    .service-name{font-weight:700;font-size:14px}
+    .service-meta{font-size:12px;color:var(--muted);margin-top:3px}
+    .status{display:inline-flex;align-items:center;gap:8px;font-size:13px}
+    .status .dot{width:7px;height:7px;box-shadow:none}
+    .dot.warn{background:var(--warn)}
+    .dot.danger{background:var(--danger)}
+
+    .meter{height:8px;background:#0c1326;border-radius:999px;overflow:hidden;margin-top:7px}
+    .bar{height:100%;border-radius:999px;background:linear-gradient(90deg,var(--accent),var(--accent-2))}
+    .usage-line{display:flex;justify-content:space-between;font-size:12px;color:var(--muted)}
+    .latency{font-size:13px}
+    .latency strong{display:block;color:white;font-size:15px;margin-bottom:3px}
+
+    .rightcol{display:grid;gap:18px}
+    .feed{padding:0 16px 14px}
+    .feed-item{padding:13px 0;border-top:1px solid var(--line)}
+    .feed-item:first-child{border-top:0}
+    .feed-title{font-size:13px;font-weight:700;line-height:1.5}
+    .feed-meta{font-size:12px;color:var(--muted);margin-top:5px}
+
+    .chart{padding:4px 18px 18px}
+    .chart-grid{height:180px;position:relative;border-left:1px solid var(--line);border-bottom:1px solid var(--line);margin-top:8px}
+    .gridline{position:absolute;left:0;right:0;border-top:1px dashed #253251}
+    .gridline:nth-child(1){top:25%}.gridline:nth-child(2){top:50%}.gridline:nth-child(3){top:75%}
+    .bars{position:absolute;inset:12px 8px 0;display:flex;align-items:flex-end;gap:8px}
+    .chartbar{flex:1;min-width:12px;border-radius:7px 7px 0 0;background:linear-gradient(180deg,var(--accent-2),var(--accent));opacity:.92;transition:.25s}
+
+    .incident{
+      margin-top:18px;padding:15px 16px;border-radius:14px;
+      border:1px solid rgba(255,176,32,.3);background:rgba(255,176,32,.08);
+      display:flex;justify-content:space-between;gap:12px;align-items:center;
+    }
+    .incident strong{font-size:13px}
+    .incident span{font-size:12px;color:#ffd790}
+
+    .pulse{animation:pulse 1.8s infinite}
+    @keyframes pulse{0%,100%{opacity:1}50%{opacity:.45}}
+
+    @media (max-width:1050px){
+      .summary{grid-template-columns:repeat(2,1fr)}
+      .layout{grid-template-columns:1fr}
+    }
+    @media (max-width:760px){
+      .app{grid-template-columns:1fr}
+      aside{display:none}
+      main{padding:20px 14px 30px}
+      .topbar{align-items:flex-start;flex-direction:column}
+      .summary{grid-template-columns:1fr 1fr}
+      .service-row{grid-template-columns:1fr 1fr}
+      .service-row .usage{grid-column:1/-1}
+    }
+    @media (max-width:520px){
+      .summary{grid-template-columns:1fr}
+      .service-row{grid-template-columns:1fr}
+      .service-row .usage{grid-column:auto}
+    }
+  </style>
+</head>
+<body>
+<div class="app">
+  <aside>
+    <div class="brand"><div class="logo">AI</div>Using AI Dashboard</div>
+    <nav>
+      <a class="active" href="#">▦ ダッシュボード</a>
+      <a href="#">◌ AIサービス</a>
+      <a href="#">◔ 使用量</a>
+      <a href="#">⚡ インシデント</a>
+      <a href="#">⚙ 設定</a>
+    </nav>
+    <div class="aside-footer">
+      <small>リアルタイム同期</small>
+      <div class="sync-mini"><span class="dot pulse"></span><span id="syncAside">接続中・10秒ごと更新</span></div>
+    </div>
+  </aside>
+
+  <main>
+    <div class="topbar">
+      <div class="title">
+        <h1>AIサービス稼働状況</h1>
+        <p>利用中サービスの状態、最新情報、使用量をひとつの画面で確認できます。</p>
+      </div>
+      <div class="top-actions">
+        <div class="badge"><span class="dot pulse"></span><span id="lastSync">最終同期: --:--:--</span></div>
+        <button id="syncBtn">今すぐ同期</button>
+      </div>
+    </div>
+
+    <section class="summary">
+      <div class="kpi">
+        <div class="kpi-label">監視中サービス</div>
+        <div class="kpi-value">4</div>
+        <div class="kpi-sub">OpenAI / Claude / Gemini / Copilot</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">正常稼働</div>
+        <div class="kpi-value ok-text">3 / 4</div>
+        <div class="kpi-sub">1サービスで軽微な遅延</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">本日のAPI使用量</div>
+        <div class="kpi-value">1.84M</div>
+        <div class="kpi-sub">tokens ・ 前日比 +12.4%</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">今月の推定コスト</div>
+        <div class="kpi-value">$248.30</div>
+        <div class="kpi-sub">予算 $350 ・ 70.9% 使用</div>
+      </div>
+    </section>
+
+    <div class="layout">
+      <section class="card">
+        <div class="card-head">
+          <h2>利用中AIサービス</h2>
+          <span>自動更新</span>
+        </div>
+        <div class="service-list">
+          <div class="service-row">
+            <div class="service">
+              <div class="service-icon">O</div>
+              <div><div class="service-name">OpenAI</div><div class="service-meta">GPT / API</div></div>
+            </div>
+            <div class="status"><span class="dot"></span><span class="ok-text">正常</span></div>
+            <div class="latency"><strong>842 ms</strong><span class="service-meta">平均応答時間</span></div>
+            <div class="usage"><div class="usage-line"><span>月間使用量</span><span>68%</span></div><div class="meter"><div class="bar" style="width:68%"></div></div></div>
+          </div>
+
+          <div class="service-row">
+            <div class="service">
+              <div class="service-icon">C</div>
+              <div><div class="service-name">Claude</div><div class="service-meta">Claude API</div></div>
+            </div>
+            <div class="status"><span class="dot"></span><span class="ok-text">正常</span></div>
+            <div class="latency"><strong>1.08 s</strong><span class="service-meta">平均応答時間</span></div>
+            <div class="usage"><div class="usage-line"><span>月間使用量</span><span>44%</span></div><div class="meter"><div class="bar" style="width:44%"></div></div></div>
+          </div>
+
+          <div class="service-row">
+            <div class="service">
+              <div class="service-icon">G</div>
+              <div><div class="service-name">Gemini</div><div class="service-meta">Gemini API</div></div>
+            </div>
+            <div class="status"><span class="dot warn"></span><span class="warn-text">一部遅延</span></div>
+            <div class="latency"><strong>2.41 s</strong><span class="service-meta">平均応答時間</span></div>
+            <div class="usage"><div class="usage-line"><span>月間使用量</span><span>77%</span></div><div class="meter"><div class="bar" style="width:77%"></div></div></div>
+          </div>
+
+          <div class="service-row">
+            <div class="service">
+              <div class="service-icon">M</div>
+              <div><div class="service-name">Microsoft Copilot</div><div class="service-meta">Microsoft 365</div></div>
+            </div>
+            <div class="status"><span class="dot"></span><span class="ok-text">正常</span></div>
+            <div class="latency"><strong>716 ms</strong><span class="service-meta">平均応答時間</span></div>
+            <div class="usage"><div class="usage-line"><span>ライセンス使用</span><span>82%</span></div><div class="meter"><div class="bar" style="width:82%"></div></div></div>
+          </div>
+        </div>
+
+        <div class="incident">
+          <div>
+            <strong>Gemini APIで応答遅延を検知</strong><br>
+            <span>一部リージョンで通常より高いレイテンシが発生しています。</span>
+          </div>
+          <div class="warn-text" style="font-size:13px;font-weight:800">監視中</div>
+        </div>
+      </section>
+
+      <div class="rightcol">
+        <section class="card">
+          <div class="card-head">
+            <h2>直近24時間の使用量</h2>
+            <span>リクエスト数</span>
+          </div>
+          <div class="chart">
+            <div class="chart-grid">
+              <div class="gridline"></div><div class="gridline"></div><div class="gridline"></div>
+              <div class="bars" id="bars"></div>
+            </div>
+          </div>
+        </section>
+
+        <section class="card">
+          <div class="card-head">
+            <h2>最新情報</h2>
+            <span>すべて表示</span>
+          </div>
+          <div class="feed">
+            <div class="feed-item">
+              <div class="feed-title">OpenAI: APIステータスは正常です</div>
+              <div class="feed-meta">2分前 ・ Status update</div>
+            </div>
+            <div class="feed-item">
+              <div class="feed-title">Gemini: 一部リクエストで遅延を確認</div>
+              <div class="feed-meta">18分前 ・ Incident</div>
+            </div>
+            <div class="feed-item">
+              <div class="feed-title">Claude: 新しいモデル更新情報を取得</div>
+              <div class="feed-meta">1時間前 ・ Release note</div>
+            </div>
+            <div class="feed-item">
+              <div class="feed-title">Copilot: 管理者向け利用レポートを更新</div>
+              <div class="feed-meta">3時間前 ・ Product update</div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script>
+  const bars = document.getElementById('bars');
+  const values = [34,49,42,63,58,76,54,68,82,71,64,89,73,94,80,69,76,88,61,72,84,78,91,86];
+  values.forEach(v=>{
+    const b = document.createElement('div');
+    b.className='chartbar';
+    b.style.height=v+'%';
+    b.title=v+'%';
+    bars.appendChild(b);
+  });
+
+  function updateSync(manual=false){
+    const now = new Date();
+    document.getElementById('lastSync').textContent =
+      '最終同期: ' + now.toLocaleTimeString('ja-JP');
+    if(manual){
+      const btn=document.getElementById('syncBtn');
+      const old=btn.textContent;
+      btn.textContent='同期しました';
+      setTimeout(()=>btn.textContent=old,1200);
+    }
+    document.querySelectorAll('.chartbar').forEach((el,i)=>{
+      const current=parseFloat(el.style.height);
+      const drift=(Math.random()*10)-5;
+      el.style.height=Math.max(20,Math.min(96,current+drift))+'%';
+    });
+  }
+
+  updateSync();
+  setInterval(()=>updateSync(false),10000);
+  document.getElementById('syncBtn').addEventListener('click',()=>updateSync(true));
+</script>
+</body>
+</html>
