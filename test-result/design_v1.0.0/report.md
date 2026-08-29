@@ -16,6 +16,10 @@ design_v1.0.0.md
   - リアルタイム同期
 ```
 
+※Skillを使う時は、2行目に以下追記するだけ。
+
+https://github.com/stellates/web-design-skills-test/blob/main/skills/design_v1.0.0.md
+
 ## 出力結果
 
 ### スキル未使用版
