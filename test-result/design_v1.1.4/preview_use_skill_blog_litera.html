@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI備忘録</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulmaswatch@0.8.1/litera/bulmaswatch.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <style>
+    :root {
+      --page-bg: #f6f5f2;
+      --paper: #ffffff;
+      --ink: #2f2f2f;
+      --muted: #77736d;
+      --line: #dedbd5;
+      --accent: #4582ec;
+      --accent-soft: #eef4ff;
+    }
+
+    html { background: var(--page-bg); }
+    body {
+      min-height: 100vh;
+      color: var(--ink);
+      background: var(--page-bg);
+    }
+
+    .site-header {
+      background: rgba(255, 255, 255, 0.96);
+      border-bottom: 1px solid var(--line);
+    }
+
+    .site-header .navbar {
+      max-width: 1120px;
+      margin: 0 auto;
+      background: transparent;
+    }
+
+    .brand-title {
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: 1.5rem;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+    }
+
+    .main-shell {
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 3rem 1.25rem 4rem;
+    }
+
+    /* 最新記事は紙面の特集記事らしく、他セクションより広く見せる。 */
+    .featured-article {
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-top: 4px solid var(--accent);
+      padding: 2.25rem;
+      margin-bottom: 3rem;
+    }
+
+    .featured-label {
+      color: var(--accent);
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      margin-bottom: 0.8rem;
+    }
+
+    .featured-title {
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: clamp(1.9rem, 4vw, 3rem);
+      line-height: 1.25;
+      margin-bottom: 1rem;
+    }
+
+    .article-meta,
+    .ranking-meta {
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    .article-summary {
+      max-width: 760px;
+      margin: 1.35rem 0 1.6rem;
+      color: #55514c;
+      line-height: 1.9;
+    }
+
+    .section-heading {
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: 1.7rem;
+      margin-bottom: 1.25rem;
+      padding-bottom: 0.6rem;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .ranking-list {
+      background: var(--paper);
+      border: 1px solid var(--line);
+    }
+
+    .ranking-item {
+      display: grid;
+      grid-template-columns: 3.4rem 1fr auto;
+      gap: 1rem;
+      align-items: center;
+      padding: 1.35rem 1.5rem;
+      border-bottom: 1px solid var(--line);
+      color: inherit;
+    }
+
+    .ranking-item:last-child { border-bottom: 0; }
+    .ranking-item:hover,
+    .ranking-item:focus-visible {
+      background: var(--accent-soft);
+      color: inherit;
+    }
+
+    .rank-number {
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: 1.9rem;
+      color: var(--accent);
+      text-align: center;
+    }
+
+    .ranking-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      line-height: 1.5;
+      margin-bottom: 0.3rem;
+    }
+
+    .archive-link-wrap {
+      margin-top: 2rem;
+      text-align: right;
+    }
+
+    .footer {
+      padding: 2rem 1.25rem;
+      border-top: 1px solid var(--line);
+      background: #efede8;
+      color: var(--muted);
+    }
+
+    @media (max-width: 768px) {
+      .main-shell { padding-top: 2rem; }
+      .featured-article { padding: 1.5rem; }
+      .ranking-item {
+        grid-template-columns: 2.5rem 1fr;
+      }
+      .ranking-item .bi { display: none; }
+      .archive-link-wrap { text-align: left; }
+    }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="navbar" aria-label="メインナビゲーション">
+      <div class="navbar-brand">
+        <a class="navbar-item brand-title" href="index.html">AI備忘録</a>
+      </div>
+      <div class="navbar-menu is-active">
+        <div class="navbar-end">
+          <a class="navbar-item" href="archive.html">過去記事</a>
+        </div>
+      </div>
+    </nav>
+  </header>
+
+  <main class="main-shell">
+    <article class="featured-article">
+      <p class="featured-label">最新記事</p>
+      <h1 class="featured-title">AIエージェントを使う前に、まず決めておきたい「任せる範囲」</h1>
+      <p class="article-meta">2026年8月29日</p>
+      <p class="article-summary">
+        AIに作業を任せるほど、最初に決めるべきなのはツールではなく境界線でした。
+        設計、実装、検証のどこまでを任せるか。最近の試行錯誤から、いったん自分なりに整理しておきます。
+      </p>
+      <a class="button is-primary" href="#latest-article">続きを読む</a>
+    </article>
+
+    <section aria-labelledby="popular-heading">
+      <h2 id="popular-heading" class="section-heading">人気記事 Top 3</h2>
+      <div class="ranking-list">
+        <a class="ranking-item" href="#popular-1">
+          <span class="rank-number">1</span>
+          <span>
+            <span class="ranking-title">ChatGPT・Gemini・Claudeをどう使い分けるか</span>
+            <span class="ranking-meta">2026年8月18日</span>
+          </span>
+          <i class="bi bi-chevron-right" aria-hidden="true"></i>
+        </a>
+        <a class="ranking-item" href="#popular-2">
+          <span class="rank-number">2</span>
+          <span>
+            <span class="ranking-title">ローカルLLMをMacBook Airで試して分かったこと</span>
+            <span class="ranking-meta">2026年8月7日</span>
+          </span>
+          <i class="bi bi-chevron-right" aria-hidden="true"></i>
+        </a>
+        <a class="ranking-item" href="#popular-3">
+          <span class="rank-number">3</span>
+          <span>
+            <span class="ranking-title">Vibe Codingで速くなったもの、速くならなかったもの</span>
+            <span class="ranking-meta">2026年8月3日</span>
+          </span>
+          <i class="bi bi-chevron-right" aria-hidden="true"></i>
+        </a>
+      </div>
+
+      <div class="archive-link-wrap">
+        <a class="button is-link is-light" href="archive.html">
+          <span>過去記事一覧を見る</span>
+          <span class="icon"><i class="bi bi-arrow-right"></i></span>
+        </a>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer has-text-centered">
+    <p>AI備忘録</p>
+  </footer>
+</body>
+</html>
