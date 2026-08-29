@@ -16,17 +16,15 @@
 次のWEB画面を作ってください。
 https://github.com/stellates/web-design-skills-test/blob/main/skills/design_v1.1.1.md
 
-- WEBサイト名
+- WEBサイト名 
   - Using AI Dashboard
 - 概要
   - 利用中AIサービスの稼働状況（障害有無）、最新情報、使用量を見える化するダッシュボード
 - 機能性
   - 利用中のAIサービスごとの各種情報が一画面で確認できる
   - リアルタイム同期
-- テーマ
-  - Flatly
 - レイアウト
-  - お任せ
+  - 左サイドバー + 上部ヘッダー + メインコンテンツ
 ```
 
 レイアウト指定は別途 `templates/screen-requirements.md` 側で扱う方針とし、今回のSkillでは主にCSS実装とデザイン上のガードレールを検証する。
