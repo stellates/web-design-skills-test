@@ -11,6 +11,7 @@ Web画面を作成するときは、以下のように簡潔に要件を指定�
 
 ```text
 次のWEB画面を作ってください。
+https://github.com/stellates/web-design-skills-test/blob/main/skills/design_vx.x.x.md
 
 - WEBサイト名
   - {サイト名}
@@ -47,3 +48,24 @@ Web画面を作成するときは、以下のように簡潔に要件を指定�
 必要な場合は、`概要` や `機能性` に個別の画面要件を追加する。
 
 デザイン上の細かなルールや実装方針は画面要件へ重複して記載せず、Design Skill側で管理する。
+
+## サンプル
+
+今回の検証で使用した要件を、このテンプレートに合わせると以下となる。
+
+```text
+次のWEB画面を作ってください。
+https://github.com/stellates/web-design-skills-test/blob/main/skills/design_v1.0.0.md
+
+- WEBサイト名
+  - Using AI Dashboard
+- 概要
+  - 利用中AIサービスの稼働状況（障害有無）、最新情報、使用量を見える化するダッシュボード
+- 機能性
+  - 利用中のAIサービスごとの各種情報が一画面で確認できる
+  - リアルタイム同期
+- テーマ
+  - Flatly
+- レイアウト
+  - お任せ
+```
