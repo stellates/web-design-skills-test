@@ -1,0 +1,765 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Using AI Dashboard</title>
+
+  <!-- Bulmaswatch Flatly -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulmaswatch@0.8.1/flatly/bulmaswatch.min.css">
+  <!-- Bootstrap Icons -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+  <style>
+    :root {
+      --sidebar-width: 240px;
+      --header-height: 64px;
+    }
+
+    html, body {
+      background: #f5f7f9;
+      min-height: 100%;
+    }
+
+    body {
+      color: #2c3e50;
+    }
+
+    .app-shell {
+      min-height: 100vh;
+    }
+
+    .sidebar {
+      position: fixed;
+      inset: 0 auto 0 0;
+      width: var(--sidebar-width);
+      background: #ffffff;
+      border-right: 1px solid #e4e8eb;
+      z-index: 30;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .sidebar-brand {
+      min-height: var(--header-height);
+      display: flex;
+      align-items: center;
+      gap: .7rem;
+      padding: 0 1.25rem;
+      border-bottom: 1px solid #e9ecef;
+      font-weight: 700;
+      color: #2c3e50;
+    }
+
+    .brand-mark {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      background: #18bc9c;
+      color: #fff;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+    }
+
+    .sidebar .menu {
+      padding: 1.25rem .85rem;
+      flex: 1;
+      overflow-y: auto;
+    }
+
+    .sidebar .menu-label {
+      padding-left: .7rem;
+      font-size: .72rem;
+      letter-spacing: .08em;
+    }
+
+    .sidebar .menu-list a {
+      border-radius: 6px;
+      padding: .7rem .75rem;
+      display: flex;
+      align-items: center;
+      gap: .7rem;
+      color: #4a4a4a;
+    }
+
+    .sidebar .menu-list a.is-active {
+      background: #edf9f6;
+      color: #15977f;
+      font-weight: 600;
+    }
+
+    .sidebar-footer {
+      padding: 1rem 1.2rem;
+      border-top: 1px solid #e9ecef;
+    }
+
+    .main-area {
+      margin-left: var(--sidebar-width);
+      min-height: 100vh;
+    }
+
+    .topbar {
+      height: var(--header-height);
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      background: rgba(255,255,255,.96);
+      border-bottom: 1px solid #e4e8eb;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 1.5rem;
+    }
+
+    .topbar-actions {
+      display: flex;
+      align-items: center;
+      gap: .75rem;
+    }
+
+    .content-area {
+      padding: 1.4rem 1.5rem 2rem;
+    }
+
+    .page-heading {
+      margin-bottom: 1.2rem;
+    }
+
+    .page-heading .title {
+      margin-bottom: .25rem;
+    }
+
+    .summary-strip {
+      margin-bottom: 1.25rem;
+    }
+
+    .summary-strip .box {
+      height: 100%;
+      box-shadow: none;
+      border: 1px solid #e5e9ec;
+      padding: 1rem 1.1rem;
+    }
+
+    .summary-value {
+      font-size: 1.7rem;
+      font-weight: 700;
+      line-height: 1.1;
+      margin-top: .25rem;
+    }
+
+    .status-dot {
+      display: inline-block;
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      margin-right: .4rem;
+      vertical-align: 1px;
+    }
+
+    .status-ok { background: #18bc9c; }
+    .status-warn { background: #f39c12; }
+    .status-error { background: #e74c3c; }
+
+    .panel-card {
+      background: #fff;
+      border: 1px solid #e5e9ec;
+      border-radius: 8px;
+      overflow: hidden;
+      height: 100%;
+    }
+
+    .panel-card-header {
+      padding: .95rem 1.05rem;
+      border-bottom: 1px solid #edf0f2;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: .75rem;
+    }
+
+    .panel-card-body {
+      padding: 1rem 1.05rem;
+    }
+
+    .service-row {
+      display: grid;
+      grid-template-columns: minmax(150px, 1.2fr) minmax(130px, .8fr) minmax(130px, .85fr) minmax(150px, 1fr);
+      gap: 1rem;
+      align-items: center;
+      padding: .9rem 0;
+      border-bottom: 1px solid #edf0f2;
+    }
+
+    .service-row:last-child {
+      border-bottom: 0;
+      padding-bottom: 0;
+    }
+
+    .service-row:first-child {
+      padding-top: 0;
+    }
+
+    .service-name {
+      display: flex;
+      align-items: center;
+      gap: .75rem;
+      min-width: 0;
+    }
+
+    .service-icon {
+      width: 38px;
+      height: 38px;
+      border-radius: 8px;
+      background: #f2f4f5;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      color: #34495e;
+      flex: 0 0 auto;
+    }
+
+    .service-meta {
+      min-width: 0;
+    }
+
+    .service-meta strong,
+    .service-meta small {
+      display: block;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .metric-label {
+      color: #7a7a7a;
+      font-size: .75rem;
+      margin-bottom: .2rem;
+    }
+
+    .metric-value {
+      font-weight: 600;
+    }
+
+    .usage-bar {
+      height: 7px;
+      border-radius: 999px;
+      background: #edf0f2;
+      overflow: hidden;
+      margin-top: .35rem;
+    }
+
+    .usage-fill {
+      height: 100%;
+      background: #18bc9c;
+      border-radius: 999px;
+    }
+
+    .usage-fill.warning {
+      background: #f39c12;
+    }
+
+    .news-item {
+      padding: .85rem 0;
+      border-bottom: 1px solid #edf0f2;
+    }
+
+    .news-item:first-child {
+      padding-top: 0;
+    }
+
+    .news-item:last-child {
+      border-bottom: 0;
+      padding-bottom: 0;
+    }
+
+    .news-item p {
+      margin-bottom: .3rem;
+    }
+
+    .news-meta {
+      font-size: .77rem;
+      color: #7a7a7a;
+    }
+
+    .sync-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: .4rem;
+      color: #15977f;
+      font-size: .82rem;
+      font-weight: 600;
+    }
+
+    .sync-pill i {
+      font-size: .8rem;
+    }
+
+    .sync-pill.is-syncing i {
+      animation: spin 1s linear infinite;
+    }
+
+    .activity-table {
+      margin-bottom: 0 !important;
+    }
+
+    .activity-table td,
+    .activity-table th {
+      vertical-align: middle;
+    }
+
+    .mini-chart {
+      height: 46px;
+      display: flex;
+      align-items: flex-end;
+      gap: 5px;
+    }
+
+    .mini-chart span {
+      flex: 1;
+      min-width: 5px;
+      border-radius: 3px 3px 0 0;
+      background: #18bc9c;
+      opacity: .82;
+    }
+
+    .mobile-menu-button {
+      display: none;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    @media (max-width: 1023px) {
+      .sidebar {
+        transform: translateX(-100%);
+        transition: transform .2s ease;
+        box-shadow: 12px 0 30px rgba(44,62,80,.12);
+      }
+
+      .sidebar.is-open {
+        transform: translateX(0);
+      }
+
+      .main-area {
+        margin-left: 0;
+      }
+
+      .mobile-menu-button {
+        display: inline-flex;
+      }
+
+      .service-row {
+        grid-template-columns: 1.3fr 1fr 1fr;
+      }
+
+      .service-row > :last-child {
+        grid-column: 1 / -1;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .content-area {
+        padding: 1rem;
+      }
+
+      .topbar {
+        padding: 0 1rem;
+      }
+
+      .page-heading {
+        margin-bottom: 1rem;
+      }
+
+      .service-row {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .service-row > :first-child,
+      .service-row > :last-child {
+        grid-column: 1 / -1;
+      }
+
+      .topbar .button .button-label {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-brand">
+        <span class="brand-mark"><i class="bi bi-cpu"></i></span>
+        <span>Using AI</span>
+      </div>
+
+      <nav class="menu">
+        <p class="menu-label">OVERVIEW</p>
+        <ul class="menu-list">
+          <li><a class="is-active" href="#"><i class="bi bi-grid-1x2-fill"></i> Dashboard</a></li>
+          <li><a href="#"><i class="bi bi-activity"></i> Service Status</a></li>
+          <li><a href="#"><i class="bi bi-bar-chart-line"></i> Usage</a></li>
+          <li><a href="#"><i class="bi bi-newspaper"></i> Updates</a></li>
+        </ul>
+
+        <p class="menu-label mt-5">MANAGE</p>
+        <ul class="menu-list">
+          <li><a href="#"><i class="bi bi-plug"></i> Connections</a></li>
+          <li><a href="#"><i class="bi bi-bell"></i> Notifications</a></li>
+          <li><a href="#"><i class="bi bi-gear"></i> Settings</a></li>
+        </ul>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="is-flex is-align-items-center is-justify-content-space-between">
+          <div>
+            <p class="is-size-7 has-text-grey mb-1">Workspace</p>
+            <p class="has-text-weight-semibold is-size-7">Personal</p>
+          </div>
+          <span class="icon has-text-grey"><i class="bi bi-chevron-expand"></i></span>
+        </div>
+      </div>
+    </aside>
+
+    <main class="main-area">
+      <header class="topbar">
+        <div class="is-flex is-align-items-center">
+          <button class="button is-white mobile-menu-button mr-2" id="menuToggle" aria-label="メニューを開く">
+            <span class="icon"><i class="bi bi-list"></i></span>
+          </button>
+          <div>
+            <strong>Using AI Dashboard</strong>
+          </div>
+        </div>
+
+        <div class="topbar-actions">
+          <span class="sync-pill" id="syncState">
+            <i class="bi bi-arrow-repeat"></i>
+            <span id="syncText">12:01 に同期</span>
+          </span>
+          <button class="button is-light is-small" id="syncButton">
+            <span class="icon"><i class="bi bi-arrow-clockwise"></i></span>
+            <span class="button-label">今すぐ同期</span>
+          </button>
+          <button class="button is-white is-small" aria-label="通知">
+            <span class="icon"><i class="bi bi-bell"></i></span>
+          </button>
+        </div>
+      </header>
+
+      <section class="content-area">
+        <div class="page-heading is-flex is-justify-content-space-between is-align-items-flex-start">
+          <div>
+            <h1 class="title is-4">Dashboard</h1>
+            <p class="has-text-grey is-size-7">利用中サービスの状態、使用量、更新情報をまとめて確認できます。</p>
+          </div>
+          <div class="is-hidden-mobile">
+            <span class="tag is-success is-light">
+              <span class="status-dot status-ok"></span> All systems operational
+            </span>
+          </div>
+        </div>
+
+        <div class="columns is-variable is-4 summary-strip">
+          <div class="column">
+            <div class="box">
+              <p class="is-size-7 has-text-grey">Connected services</p>
+              <p class="summary-value">4</p>
+              <p class="is-size-7 has-text-grey mt-2">4 / 4 connected</p>
+            </div>
+          </div>
+
+          <div class="column">
+            <div class="box">
+              <p class="is-size-7 has-text-grey">Service health</p>
+              <p class="summary-value">100%</p>
+              <p class="is-size-7 has-text-success mt-2"><span class="status-dot status-ok"></span>No incidents</p>
+            </div>
+          </div>
+
+          <div class="column">
+            <div class="box">
+              <p class="is-size-7 has-text-grey">Monthly requests</p>
+              <p class="summary-value">18.4k</p>
+              <p class="is-size-7 has-text-grey mt-2">+12.8% vs last month</p>
+            </div>
+          </div>
+
+          <div class="column">
+            <div class="box">
+              <p class="is-size-7 has-text-grey">Estimated cost</p>
+              <p class="summary-value">¥8,420</p>
+              <p class="is-size-7 has-text-grey mt-2">72% of monthly budget</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="columns is-variable is-4">
+          <div class="column is-8">
+            <section class="panel-card mb-4">
+              <div class="panel-card-header">
+                <div>
+                  <p class="has-text-weight-semibold">AI Services</p>
+                </div>
+                <button class="button is-small is-light">
+                  <span class="icon is-small"><i class="bi bi-plus-lg"></i></span>
+                  <span>Add service</span>
+                </button>
+              </div>
+
+              <div class="panel-card-body">
+                <div class="service-row">
+                  <div class="service-name">
+                    <div class="service-icon">O</div>
+                    <div class="service-meta">
+                      <strong>OpenAI</strong>
+                      <small class="has-text-grey">ChatGPT / API</small>
+                    </div>
+                  </div>
+                  <div>
+                    <p class="metric-label">Status</p>
+                    <p class="metric-value"><span class="status-dot status-ok"></span>Operational</p>
+                  </div>
+                  <div>
+                    <p class="metric-label">Requests</p>
+                    <p class="metric-value">7,824</p>
+                  </div>
+                  <div>
+                    <div class="is-flex is-justify-content-space-between">
+                      <span class="metric-label">Usage</span>
+                      <span class="is-size-7">68%</span>
+                    </div>
+                    <div class="usage-bar"><div class="usage-fill" style="width:68%"></div></div>
+                  </div>
+                </div>
+
+                <div class="service-row">
+                  <div class="service-name">
+                    <div class="service-icon">G</div>
+                    <div class="service-meta">
+                      <strong>Google Gemini</strong>
+                      <small class="has-text-grey">Gemini Advanced</small>
+                    </div>
+                  </div>
+                  <div>
+                    <p class="metric-label">Status</p>
+                    <p class="metric-value"><span class="status-dot status-ok"></span>Operational</p>
+                  </div>
+                  <div>
+                    <p class="metric-label">Requests</p>
+                    <p class="metric-value">5,962</p>
+                  </div>
+                  <div>
+                    <div class="is-flex is-justify-content-space-between">
+                      <span class="metric-label">Usage</span>
+                      <span class="is-size-7">81%</span>
+                    </div>
+                    <div class="usage-bar"><div class="usage-fill warning" style="width:81%"></div></div>
+                  </div>
+                </div>
+
+                <div class="service-row">
+                  <div class="service-name">
+                    <div class="service-icon">A</div>
+                    <div class="service-meta">
+                      <strong>Anthropic</strong>
+                      <small class="has-text-grey">Claude</small>
+                    </div>
+                  </div>
+                  <div>
+                    <p class="metric-label">Status</p>
+                    <p class="metric-value"><span class="status-dot status-ok"></span>Operational</p>
+                  </div>
+                  <div>
+                    <p class="metric-label">Requests</p>
+                    <p class="metric-value">3,904</p>
+                  </div>
+                  <div>
+                    <div class="is-flex is-justify-content-space-between">
+                      <span class="metric-label">Usage</span>
+                      <span class="is-size-7">53%</span>
+                    </div>
+                    <div class="usage-bar"><div class="usage-fill" style="width:53%"></div></div>
+                  </div>
+                </div>
+
+                <div class="service-row">
+                  <div class="service-name">
+                    <div class="service-icon">P</div>
+                    <div class="service-meta">
+                      <strong>Perplexity</strong>
+                      <small class="has-text-grey">Pro</small>
+                    </div>
+                  </div>
+                  <div>
+                    <p class="metric-label">Status</p>
+                    <p class="metric-value"><span class="status-dot status-ok"></span>Operational</p>
+                  </div>
+                  <div>
+                    <p class="metric-label">Requests</p>
+                    <p class="metric-value">742</p>
+                  </div>
+                  <div>
+                    <div class="is-flex is-justify-content-space-between">
+                      <span class="metric-label">Usage</span>
+                      <span class="is-size-7">29%</span>
+                    </div>
+                    <div class="usage-bar"><div class="usage-fill" style="width:29%"></div></div>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <section class="panel-card">
+              <div class="panel-card-header">
+                <p class="has-text-weight-semibold">Recent Activity</p>
+                <a class="is-size-7" href="#">View all</a>
+              </div>
+              <div class="panel-card-body p-0">
+                <div class="table-container">
+                  <table class="table is-fullwidth is-hoverable activity-table">
+                    <thead>
+                      <tr>
+                        <th>Time</th>
+                        <th>Service</th>
+                        <th>Event</th>
+                        <th class="has-text-right">Status</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td class="is-size-7">11:58</td>
+                        <td>OpenAI</td>
+                        <td class="is-size-7">Usage data synchronized</td>
+                        <td class="has-text-right"><span class="tag is-success is-light">Success</span></td>
+                      </tr>
+                      <tr>
+                        <td class="is-size-7">11:52</td>
+                        <td>Gemini</td>
+                        <td class="is-size-7">Quota information updated</td>
+                        <td class="has-text-right"><span class="tag is-success is-light">Success</span></td>
+                      </tr>
+                      <tr>
+                        <td class="is-size-7">11:47</td>
+                        <td>Claude</td>
+                        <td class="is-size-7">Status page checked</td>
+                        <td class="has-text-right"><span class="tag is-success is-light">Success</span></td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </section>
+          </div>
+
+          <div class="column is-4">
+            <section class="panel-card mb-4">
+              <div class="panel-card-header">
+                <p class="has-text-weight-semibold">Usage Trend</p>
+                <span class="tag is-light">7 days</span>
+              </div>
+              <div class="panel-card-body">
+                <div class="is-flex is-justify-content-space-between is-align-items-flex-end mb-4">
+                  <div>
+                    <p class="is-size-7 has-text-grey">Requests</p>
+                    <p class="title is-4 mb-0">5,218</p>
+                  </div>
+                  <p class="is-size-7 has-text-success">+8.6%</p>
+                </div>
+
+                <div class="mini-chart" aria-label="7日間の使用量推移">
+                  <span style="height:44%"></span>
+                  <span style="height:58%"></span>
+                  <span style="height:51%"></span>
+                  <span style="height:72%"></span>
+                  <span style="height:62%"></span>
+                  <span style="height:88%"></span>
+                  <span style="height:78%"></span>
+                </div>
+
+                <div class="is-flex is-justify-content-space-between mt-2 has-text-grey is-size-7">
+                  <span>Aug 23</span>
+                  <span>Aug 29</span>
+                </div>
+              </div>
+            </section>
+
+            <section class="panel-card">
+              <div class="panel-card-header">
+                <p class="has-text-weight-semibold">Latest Updates</p>
+                <a class="is-size-7" href="#">View all</a>
+              </div>
+              <div class="panel-card-body">
+                <article class="news-item">
+                  <p class="has-text-weight-semibold is-size-7">OpenAI platform update</p>
+                  <p class="is-size-7">New model and platform changes are available.</p>
+                  <p class="news-meta">OpenAI · 32 min ago</p>
+                </article>
+
+                <article class="news-item">
+                  <p class="has-text-weight-semibold is-size-7">Gemini service notice</p>
+                  <p class="is-size-7">Usage dashboard reporting has been updated.</p>
+                  <p class="news-meta">Google · 1 hr ago</p>
+                </article>
+
+                <article class="news-item">
+                  <p class="has-text-weight-semibold is-size-7">Claude product update</p>
+                  <p class="is-size-7">New collaboration features are now available.</p>
+                  <p class="news-meta">Anthropic · 3 hrs ago</p>
+                </article>
+              </div>
+            </section>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    const sidebar = document.getElementById('sidebar');
+    const menuToggle = document.getElementById('menuToggle');
+    const syncButton = document.getElementById('syncButton');
+    const syncState = document.getElementById('syncState');
+    const syncText = document.getElementById('syncText');
+
+    menuToggle?.addEventListener('click', () => {
+      sidebar.classList.toggle('is-open');
+    });
+
+    document.addEventListener('click', (event) => {
+      if (window.innerWidth <= 1023 &&
+          sidebar.classList.contains('is-open') &&
+          !sidebar.contains(event.target) &&
+          !menuToggle.contains(event.target)) {
+        sidebar.classList.remove('is-open');
+      }
+    });
+
+    function syncNow() {
+      syncState.classList.add('is-syncing');
+      syncText.textContent = '同期中...';
+      syncButton.disabled = true;
+
+      setTimeout(() => {
+        const now = new Date();
+        const time = now.toLocaleTimeString('ja-JP', {
+          hour: '2-digit',
+          minute: '2-digit'
+        });
+        syncText.textContent = `${time} に同期`;
+        syncState.classList.remove('is-syncing');
+        syncButton.disabled = false;
+      }, 900);
+    }
+
+    syncButton.addEventListener('click', syncNow);
+
+    // Demo: simulate realtime synchronization every 30 seconds.
+    setInterval(syncNow, 30000);
+  </script>
+</body>
+</html>
