@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Using AI Dashboard</title>
+
+  <!-- Bulmaswatch Flatly -->
+  <link
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/bulmaswatch@0.8.1/flatly/bulmaswatch.min.css"
+  />
+  <!-- Bootstrap Icons -->
+  <link
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
+  />
+
+  <style>
+    :root {
+      --sidebar-width: 236px;
+      --header-height: 68px;
+      --surface: #ffffff;
+      --canvas: #f5f7f9;
+      --line: #e6eaee;
+      --muted: #6b7b88;
+      --text: #24313b;
+      --flatly-primary: #2c3e50;
+      --flatly-accent: #18bc9c;
+      --warning-soft: #fff6dc;
+      --warning-text: #8a6414;
+      --success-soft: #e9f8f4;
+      --success-text: #157963;
+      --danger-soft: #fdecec;
+      --danger-text: #a33a3a;
+    }
+
+    html,
+    body {
+      min-height: 100%;
+      background: var(--canvas);
+      color: var(--text);
+    }
+
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans JP",
+        "Helvetica Neue", Arial, sans-serif;
+    }
+
+    .app-shell {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: var(--sidebar-width) minmax(0, 1fr);
+      grid-template-rows: var(--header-height) minmax(0, 1fr);
+      grid-template-areas:
+        "sidebar header"
+        "sidebar main";
+    }
+
+    .sidebar {
+      grid-area: sidebar;
+      background: var(--flatly-primary);
+      color: #fff;
+      padding: 24px 18px;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow-y: auto;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 32px;
+      padding: 0 8px;
+    }
+
+    .brand-mark {
+      width: 34px;
+      height: 34px;
+      border-radius: 8px;
+      background: var(--flatly-accent);
+      display: grid;
+      place-items: center;
+      font-size: 18px;
+      color: #fff;
+      flex: 0 0 auto;
+    }
+
+    .brand-name {
+      font-weight: 700;
+      font-size: 1.03rem;
+      line-height: 1.2;
+      letter-spacing: -0.01em;
+    }
+
+    .sidebar-label {
+      margin: 0 8px 10px;
+      color: rgba(255, 255, 255, 0.55);
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+    }
+
+    .service-nav {
+      display: grid;
+      gap: 6px;
+    }
+
+    .service-nav a {
+      color: rgba(255, 255, 255, 0.82);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      border-radius: 8px;
+      padding: 10px 12px;
+      font-size: 0.92rem;
+      transition: background-color 0.16s ease, color 0.16s ease;
+    }
+
+    .service-nav a:hover,
+    .service-nav a.is-active {
+      background: rgba(255, 255, 255, 0.1);
+      color: #fff;
+    }
+
+    .service-nav a.is-active {
+      box-shadow: inset 3px 0 0 var(--flatly-accent);
+    }
+
+    .service-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--flatly-accent);
+      flex: 0 0 auto;
+    }
+
+    .sidebar-note {
+      margin-top: 30px;
+      border-top: 1px solid rgba(255, 255, 255, 0.12);
+      padding: 18px 8px 0;
+      color: rgba(255, 255, 255, 0.62);
+      font-size: 0.78rem;
+      line-height: 1.6;
+    }
+
+    .topbar {
+      grid-area: header;
+      background: var(--surface);
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+      padding: 0 28px;
+      position: sticky;
+      top: 0;
+      z-index: 20;
+    }
+
+    .page-title {
+      min-width: 0;
+    }
+
+    .page-title h1 {
+      margin: 0;
+      font-size: 1.08rem;
+      font-weight: 700;
+      color: var(--flatly-primary);
+    }
+
+    .sync-state {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--muted);
+      font-size: 0.84rem;
+      white-space: nowrap;
+    }
+
+    .sync-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border: 1px solid #ecdca8;
+      background: var(--warning-soft);
+      color: var(--warning-text);
+      border-radius: 999px;
+      padding: 6px 10px;
+      font-weight: 600;
+    }
+
+    .main {
+      grid-area: main;
+      padding: 28px;
+      overflow: auto;
+    }
+
+    .intro {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 24px;
+      margin-bottom: 22px;
+    }
+
+    .intro h2 {
+      margin: 0 0 4px;
+      font-size: 1.55rem;
+      font-weight: 700;
+      color: var(--flatly-primary);
+      letter-spacing: -0.02em;
+    }
+
+    .intro p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    .services-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 18px;
+    }
+
+    .service-card {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 3px 12px rgba(36, 49, 59, 0.04);
+      min-width: 0;
+    }
+
+    .service-card-header {
+      padding: 18px 18px 16px;
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 14px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .service-title {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 0;
+    }
+
+    .service-icon {
+      width: 42px;
+      height: 42px;
+      border-radius: 9px;
+      display: grid;
+      place-items: center;
+      background: #edf1f4;
+      color: var(--flatly-primary);
+      font-size: 1.15rem;
+      flex: 0 0 auto;
+    }
+
+    .service-title h3 {
+      margin: 0 0 2px;
+      font-size: 1rem;
+      color: var(--flatly-primary);
+      font-weight: 700;
+    }
+
+    .service-plan {
+      color: var(--muted);
+      font-size: 0.78rem;
+    }
+
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border-radius: 999px;
+      padding: 5px 9px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      white-space: nowrap;
+      background: var(--success-soft);
+      color: var(--success-text);
+    }
+
+    .status-pill.warning {
+      background: var(--warning-soft);
+      color: var(--warning-text);
+    }
+
+    .status-pill.danger {
+      background: var(--danger-soft);
+      color: var(--danger-text);
+    }
+
+    .card-section {
+      padding: 16px 18px;
+    }
+
+    .card-section + .card-section {
+      border-top: 1px solid var(--line);
+    }
+
+    .section-label {
+      margin: 0 0 10px;
+      color: var(--muted);
+      font-size: 0.73rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+    }
+
+    .status-row {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--flatly-primary);
+    }
+
+    .status-indicator {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: var(--flatly-accent);
+      box-shadow: 0 0 0 4px rgba(24, 188, 156, 0.12);
+      flex: 0 0 auto;
+    }
+
+    .status-indicator.warning {
+      background: #f39c12;
+      box-shadow: 0 0 0 4px rgba(243, 156, 18, 0.12);
+    }
+
+    .latest-title {
+      margin: 0 0 6px;
+      font-size: 0.9rem;
+      font-weight: 700;
+      line-height: 1.45;
+      color: var(--flatly-primary);
+    }
+
+    .latest-meta {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--muted);
+      font-size: 0.76rem;
+    }
+
+    .usage-head {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 8px;
+    }
+
+    .usage-value {
+      font-size: 1.3rem;
+      line-height: 1;
+      font-weight: 700;
+      color: var(--flatly-primary);
+    }
+
+    .usage-unit {
+      color: var(--muted);
+      font-size: 0.76rem;
+      text-align: right;
+    }
+
+    .progress {
+      height: 0.48rem;
+      margin-bottom: 7px !important;
+      background: #edf0f2;
+    }
+
+    .usage-foot {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      color: var(--muted);
+      font-size: 0.74rem;
+    }
+
+    .mock-caption {
+      margin-top: 18px;
+      color: var(--muted);
+      font-size: 0.74rem;
+      text-align: right;
+    }
+
+    /* Narrow screens collapse the fixed sidebar into the document flow. */
+    @media (max-width: 980px) {
+      .app-shell {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto auto 1fr;
+        grid-template-areas:
+          "sidebar"
+          "header"
+          "main";
+      }
+
+      .sidebar {
+        position: static;
+        height: auto;
+        padding: 16px 18px;
+      }
+
+      .brand {
+        margin-bottom: 14px;
+      }
+
+      .sidebar-label,
+      .sidebar-note {
+        display: none;
+      }
+
+      .service-nav {
+        display: flex;
+        overflow-x: auto;
+        padding-bottom: 2px;
+      }
+
+      .service-nav a {
+        white-space: nowrap;
+      }
+
+      .topbar {
+        position: static;
+        min-height: var(--header-height);
+      }
+
+      .services-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .topbar,
+      .main {
+        padding-left: 18px;
+        padding-right: 18px;
+      }
+
+      .topbar {
+        align-items: flex-start;
+        flex-direction: column;
+        justify-content: center;
+        gap: 6px;
+        padding-top: 12px;
+        padding-bottom: 12px;
+      }
+
+      .intro {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 8px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true">
+          <i class="bi bi-stars"></i>
+        </div>
+        <div class="brand-name">Using AI<br />Dashboard</div>
+      </div>
+
+      <p class="sidebar-label">AI SERVICES</p>
+
+      <nav class="service-nav" aria-label="AIサービス">
+        <a class="is-active" href="#all">
+          <i class="bi bi-grid-1x2-fill" aria-hidden="true"></i>
+          <span>すべて</span>
+        </a>
+        <a href="#chatgpt">
+          <span class="service-dot" aria-hidden="true"></span>
+          <span>ChatGPT</span>
+        </a>
+        <a href="#claude">
+          <span class="service-dot" aria-hidden="true"></span>
+          <span>Claude</span>
+        </a>
+        <a href="#gemini">
+          <span class="service-dot" aria-hidden="true"></span>
+          <span>Gemini</span>
+        </a>
+      </nav>
+
+      <div class="sidebar-note">
+        外部APIは未接続です。<br />
+        表示データはUI確認用のモックです。
+      </div>
+    </aside>
+
+    <header class="topbar">
+      <div class="page-title">
+        <h1>Using AI Dashboard</h1>
+      </div>
+
+      <div class="sync-state" aria-label="同期状態">
+        <span class="sync-badge">
+          <i class="bi bi-cloud-slash" aria-hidden="true"></i>
+          接続先未設定
+        </span>
+        <span>リアルタイム同期</span>
+      </div>
+    </header>
+
+    <main class="main" id="all">
+      <section class="intro">
+        <div>
+          <h2>AIサービス状況</h2>
+          <p>利用中サービスの稼働状況、最新情報、使用量をまとめて確認できます。</p>
+        </div>
+      </section>
+
+      <section class="services-grid" aria-label="AIサービス一覧">
+        <article class="service-card" id="chatgpt">
+          <header class="service-card-header">
+            <div class="service-title">
+              <div class="service-icon" aria-hidden="true">
+                <i class="bi bi-chat-square-dots"></i>
+              </div>
+              <div>
+                <h3>ChatGPT</h3>
+                <div class="service-plan">利用中</div>
+              </div>
+            </div>
+            <span class="status-pill">
+              <i class="bi bi-check-circle-fill" aria-hidden="true"></i>
+              正常
+            </span>
+          </header>
+
+          <div class="card-section">
+            <p class="section-label">稼働状況</p>
+            <div class="status-row">
+              <span class="status-indicator" aria-hidden="true"></span>
+              障害情報なし
+            </div>
+          </div>
+
+          <div class="card-section">
+            <p class="section-label">最新情報</p>
+            <p class="latest-title">新しいモデル更新情報が公開されました</p>
+            <div class="latest-meta">
+              <i class="bi bi-clock" aria-hidden="true"></i>
+              <span>本日更新</span>
+            </div>
+          </div>
+
+          <div class="card-section">
+            <p class="section-label">使用量</p>
+            <div class="usage-head">
+              <span class="usage-value">68%</span>
+              <span class="usage-unit">現在の利用枠</span>
+            </div>
+            <progress class="progress is-primary" value="68" max="100">68%</progress>
+            <div class="usage-foot">
+              <span>利用済み</span>
+              <span>残り 32%</span>
+            </div>
+          </div>
+        </article>
+
+        <article class="service-card" id="claude">
+          <header class="service-card-header">
+            <div class="service-title">
+              <div class="service-icon" aria-hidden="true">
+                <i class="bi bi-braces-asterisk"></i>
+              </div>
+              <div>
+                <h3>Claude</h3>
+                <div class="service-plan">利用中</div>
+              </div>
+            </div>
+            <span class="status-pill warning">
+              <i class="bi bi-exclamation-circle-fill" aria-hidden="true"></i>
+              一部影響
+            </span>
+          </header>
+
+          <div class="card-section">
+            <p class="section-label">稼働状況</p>
+            <div class="status-row">
+              <span class="status-indicator warning" aria-hidden="true"></span>
+              一部機能で遅延
+            </div>
+          </div>
+
+          <div class="card-section">
+            <p class="section-label">最新情報</p>
+            <p class="latest-title">サービス更新に関する案内が公開されました</p>
+            <div class="latest-meta">
+              <i class="bi bi-clock" aria-hidden="true"></i>
+              <span>昨日更新</span>
+            </div>
+          </div>
+
+          <div class="card-section">
+            <p class="section-label">使用量</p>
+            <div class="usage-head">
+              <span class="usage-value">42%</span>
+              <span class="usage-unit">現在の利用枠</span>
+            </div>
+            <progress class="progress is-primary" value="42" max="100">42%</progress>
+            <div class="usage-foot">
+              <span>利用済み</span>
+              <span>残り 58%</span>
+            </div>
+          </div>
+        </article>
+
+        <article class="service-card" id="gemini">
+          <header class="service-card-header">
+            <div class="service-title">
+              <div class="service-icon" aria-hidden="true">
+                <i class="bi bi-gem"></i>
+              </div>
+              <div>
+                <h3>Gemini</h3>
+                <div class="service-plan">利用中</div>
+              </div>
+            </div>
+            <span class="status-pill">
+              <i class="bi bi-check-circle-fill" aria-hidden="true"></i>
+              正常
+            </span>
+          </header>
+
+          <div class="card-section">
+            <p class="section-label">稼働状況</p>
+            <div class="status-row">
+              <span class="status-indicator" aria-hidden="true"></span>
+              障害情報なし
+            </div>
+          </div>
+
+          <div class="card-section">
+            <p class="section-label">最新情報</p>
+            <p class="latest-title">機能改善に関する最新のお知らせがあります</p>
+            <div class="latest-meta">
+              <i class="bi bi-clock" aria-hidden="true"></i>
+              <span>2日前更新</span>
+            </div>
+          </div>
+
+          <div class="card-section">
+            <p class="section-label">使用量</p>
+            <div class="usage-head">
+              <span class="usage-value">81%</span>
+              <span class="usage-unit">現在の利用枠</span>
+            </div>
+            <progress class="progress is-primary" value="81" max="100">81%</progress>
+            <div class="usage-foot">
+              <span>利用済み</span>
+              <span>残り 19%</span>
+            </div>
+          </div>
+        </article>
+      </section>
+
+      <p class="mock-caption">※ 表示内容はUI確認用のモックデータです。</p>
+    </main>
+  </div>
+</body>
+</html>
