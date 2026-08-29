@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Using AI Dashboard</title>
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulmaswatch@0.8.1/flatly/bulmaswatch.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+  <style>
+    html, body {
+      min-height: 100%;
+      background: #f5f7f9;
+    }
+
+    .app-shell {
+      min-height: 100vh;
+    }
+
+    .app-sidebar {
+      position: fixed;
+      inset: 0 auto 0 0;
+      width: 240px;
+      overflow-y: auto;
+      z-index: 30;
+    }
+
+    .app-main {
+      margin-left: 240px;
+      min-height: 100vh;
+    }
+
+    .app-header {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+    }
+
+    .service-row {
+      display: grid;
+      grid-template-columns: minmax(220px, 1.7fr) minmax(130px, .8fr) minmax(170px, 1fr) minmax(170px, 1fr);
+      gap: 1rem;
+      align-items: center;
+    }
+
+    .service-row + .service-row {
+      border-top: 1px solid #e9ecef;
+    }
+
+    .status-dot {
+      width: .65rem;
+      height: .65rem;
+      border-radius: 50%;
+      display: inline-block;
+      margin-right: .45rem;
+      background: currentColor;
+    }
+
+    .usage-cell {
+      min-width: 0;
+    }
+
+    .sidebar-brand {
+      min-height: 64px;
+    }
+
+    .sidebar-footer {
+      margin-top: auto;
+    }
+
+    @media (max-width: 1023px) {
+      .app-sidebar {
+        position: static;
+        width: auto;
+      }
+
+      .app-main {
+        margin-left: 0;
+      }
+
+      .app-header {
+        position: static;
+      }
+
+      .service-row {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .service-row {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="app-sidebar has-background-primary p-4 is-flex is-flex-direction-column">
+      <div class="sidebar-brand is-flex is-align-items-center mb-5">
+        <span class="icon has-text-white mr-2">
+          <i class="bi bi-activity"></i>
+        </span>
+        <strong class="has-text-white is-size-5">Using AI</strong>
+      </div>
+
+      <nav class="menu">
+        <p class="menu-label has-text-white-ter">MAIN</p>
+        <ul class="menu-list">
+          <li>
+            <a class="has-background-link has-text-white">
+              <span class="icon mr-2"><i class="bi bi-grid-1x2-fill"></i></span>
+              ダッシュボード
+            </a>
+          </li>
+          <li>
+            <a class="has-text-white">
+              <span class="icon mr-2"><i class="bi bi-cpu"></i></span>
+              AIサービス
+            </a>
+          </li>
+          <li>
+            <a class="has-text-white">
+              <span class="icon mr-2"><i class="bi bi-bar-chart"></i></span>
+              使用量
+            </a>
+          </li>
+          <li>
+            <a class="has-text-white">
+              <span class="icon mr-2"><i class="bi bi-bell"></i></span>
+              通知
+            </a>
+          </li>
+        </ul>
+
+        <p class="menu-label has-text-white-ter mt-5">SYSTEM</p>
+        <ul class="menu-list">
+          <li>
+            <a class="has-text-white">
+              <span class="icon mr-2"><i class="bi bi-sliders"></i></span>
+              設定
+            </a>
+          </li>
+        </ul>
+      </nav>
+
+      <div class="sidebar-footer mt-auto pt-5">
+        <div class="is-flex is-align-items-center has-text-white">
+          <span class="icon mr-2"><i class="bi bi-cloud-check"></i></span>
+          <div>
+            <p class="is-size-7 has-text-white-ter">同期状態</p>
+            <p class="is-size-7 has-text-weight-semibold">リアルタイム同期中</p>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <div class="app-main">
+      <header class="app-header navbar has-shadow has-background-white px-4" role="navigation">
+        <div class="navbar-brand">
+          <div class="navbar-item">
+            <div>
+              <p class="has-text-weight-semibold">Using AI Dashboard</p>
+              <p class="is-size-7 has-text-grey">AIサービスの稼働状況・最新情報・使用量</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="navbar-menu is-active">
+          <div class="navbar-end">
+            <div class="navbar-item">
+              <span class="tag is-success is-light mr-3">
+                <span class="status-dot"></span>
+                Live
+              </span>
+              <button class="button is-light" id="refreshButton">
+                <span class="icon"><i class="bi bi-arrow-clockwise"></i></span>
+                <span>更新</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <main class="section py-5">
+        <div class="container is-fluid">
+          <div class="level mb-5">
+            <div class="level-left">
+              <div>
+                <h1 class="title is-4 mb-2">ダッシュボード</h1>
+                <p class="subtitle is-6 has-text-grey mb-0">
+                  最終同期: <span id="lastSync">2026/08/29 11:35:00</span>
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div class="columns is-multiline mb-2">
+            <div class="column is-12-mobile is-6-tablet is-3-desktop">
+              <div class="box">
+                <p class="heading">登録サービス</p>
+                <p class="title is-4">4</p>
+                <p class="is-size-7 has-text-grey">監視対象</p>
+              </div>
+            </div>
+            <div class="column is-12-mobile is-6-tablet is-3-desktop">
+              <div class="box">
+                <p class="heading">正常稼働</p>
+                <p class="title is-4 has-text-success">3</p>
+                <p class="is-size-7 has-text-grey">重大障害なし</p>
+              </div>
+            </div>
+            <div class="column is-12-mobile is-6-tablet is-3-desktop">
+              <div class="box">
+                <p class="heading">注意</p>
+                <p class="title is-4 has-text-warning">1</p>
+                <p class="is-size-7 has-text-grey">一部遅延を検知</p>
+              </div>
+            </div>
+            <div class="column is-12-mobile is-6-tablet is-3-desktop">
+              <div class="box">
+                <p class="heading">今月の利用額</p>
+                <p class="title is-4">¥12,480</p>
+                <p class="is-size-7 has-text-grey">予算 62% 使用</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="columns">
+            <div class="column is-8-desktop">
+              <section class="box">
+                <div class="level mb-4">
+                  <div class="level-left">
+                    <div>
+                      <h2 class="title is-5 mb-1">AIサービス稼働状況</h2>
+                      <p class="is-size-7 has-text-grey">状態・使用量・直近同期を一覧表示</p>
+                    </div>
+                  </div>
+                  <div class="level-right">
+                    <span class="is-size-7 has-text-grey">自動更新: 30秒</span>
+                  </div>
+                </div>
+
+                <div class="service-row py-3 has-text-grey is-size-7 has-text-weight-semibold is-hidden-mobile">
+                  <div>サービス</div>
+                  <div>状態</div>
+                  <div>使用量</div>
+                  <div>最終同期</div>
+                </div>
+
+                <div class="service-row py-4">
+                  <div>
+                    <p class="has-text-weight-semibold">ChatGPT</p>
+                    <p class="is-size-7 has-text-grey">OpenAI</p>
+                  </div>
+                  <div>
+                    <span class="has-text-success"><span class="status-dot"></span>正常</span>
+                  </div>
+                  <div class="usage-cell">
+                    <div class="is-flex is-justify-content-space-between is-size-7 mb-1">
+                      <span>月間使用量</span><span>68%</span>
+                    </div>
+                    <progress class="progress is-success is-small" value="68" max="100">68%</progress>
+                  </div>
+                  <div class="is-size-7 has-text-grey service-sync">11:34:52</div>
+                </div>
+
+                <div class="service-row py-4">
+                  <div>
+                    <p class="has-text-weight-semibold">Claude</p>
+                    <p class="is-size-7 has-text-grey">Anthropic</p>
+                  </div>
+                  <div>
+                    <span class="has-text-success"><span class="status-dot"></span>正常</span>
+                  </div>
+                  <div class="usage-cell">
+                    <div class="is-flex is-justify-content-space-between is-size-7 mb-1">
+                      <span>月間使用量</span><span>44%</span>
+                    </div>
+                    <progress class="progress is-info is-small" value="44" max="100">44%</progress>
+                  </div>
+                  <div class="is-size-7 has-text-grey service-sync">11:34:49</div>
+                </div>
+
+                <div class="service-row py-4">
+                  <div>
+                    <p class="has-text-weight-semibold">Gemini</p>
+                    <p class="is-size-7 has-text-grey">Google</p>
+                  </div>
+                  <div>
+                    <span class="has-text-warning"><span class="status-dot"></span>遅延</span>
+                  </div>
+                  <div class="usage-cell">
+                    <div class="is-flex is-justify-content-space-between is-size-7 mb-1">
+                      <span>月間使用量</span><span>79%</span>
+                    </div>
+                    <progress class="progress is-warning is-small" value="79" max="100">79%</progress>
+                  </div>
+                  <div class="is-size-7 has-text-grey service-sync">11:34:41</div>
+                </div>
+
+                <div class="service-row py-4">
+                  <div>
+                    <p class="has-text-weight-semibold">GitHub Copilot</p>
+                    <p class="is-size-7 has-text-grey">GitHub</p>
+                  </div>
+                  <div>
+                    <span class="has-text-success"><span class="status-dot"></span>正常</span>
+                  </div>
+                  <div class="usage-cell">
+                    <div class="is-flex is-justify-content-space-between is-size-7 mb-1">
+                      <span>月間使用量</span><span>53%</span>
+                    </div>
+                    <progress class="progress is-primary is-small" value="53" max="100">53%</progress>
+                  </div>
+                  <div class="is-size-7 has-text-grey service-sync">11:34:46</div>
+                </div>
+              </section>
+
+              <section class="box">
+                <div class="level mb-4">
+                  <div class="level-left">
+                    <h2 class="title is-5 mb-0">使用量サマリー</h2>
+                  </div>
+                  <div class="level-right">
+                    <div class="select is-small">
+                      <select aria-label="期間">
+                        <option>今月</option>
+                        <option>先月</option>
+                        <option>過去3か月</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="table-container">
+                  <table class="table is-fullwidth is-hoverable">
+                    <thead>
+                      <tr>
+                        <th>サービス</th>
+                        <th class="has-text-right">利用回数</th>
+                        <th class="has-text-right">利用額</th>
+                        <th class="has-text-right">前月比</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td>ChatGPT</td>
+                        <td class="has-text-right">1,284</td>
+                        <td class="has-text-right">¥5,920</td>
+                        <td class="has-text-right has-text-danger">+12%</td>
+                      </tr>
+                      <tr>
+                        <td>Claude</td>
+                        <td class="has-text-right">842</td>
+                        <td class="has-text-right">¥3,240</td>
+                        <td class="has-text-right has-text-success">-4%</td>
+                      </tr>
+                      <tr>
+                        <td>Gemini</td>
+                        <td class="has-text-right">731</td>
+                        <td class="has-text-right">¥2,180</td>
+                        <td class="has-text-right has-text-danger">+8%</td>
+                      </tr>
+                      <tr>
+                        <td>GitHub Copilot</td>
+                        <td class="has-text-right">418</td>
+                        <td class="has-text-right">¥1,140</td>
+                        <td class="has-text-right">±0%</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </section>
+            </div>
+
+            <div class="column is-4-desktop">
+              <section class="panel">
+                <p class="panel-heading">最新情報</p>
+
+                <a class="panel-block is-align-items-flex-start">
+                  <span class="panel-icon has-text-info"><i class="bi bi-info-circle"></i></span>
+                  <span>
+                    <strong class="is-size-7">ChatGPT</strong>
+                    <span class="is-block is-size-7">新しいモデル更新情報が公開されました。</span>
+                    <span class="is-block is-size-7 has-text-grey mt-1">10:42</span>
+                  </span>
+                </a>
+
+                <a class="panel-block is-align-items-flex-start">
+                  <span class="panel-icon has-text-warning"><i class="bi bi-exclamation-triangle"></i></span>
+                  <span>
+                    <strong class="is-size-7">Gemini</strong>
+                    <span class="is-block is-size-7">一部リクエストで応答遅延を検知しています。</span>
+                    <span class="is-block is-size-7 has-text-grey mt-1">09:58</span>
+                  </span>
+                </a>
+
+                <a class="panel-block is-align-items-flex-start">
+                  <span class="panel-icon has-text-info"><i class="bi bi-info-circle"></i></span>
+                  <span>
+                    <strong class="is-size-7">Claude</strong>
+                    <span class="is-block is-size-7">管理画面の利用統計が更新されました。</span>
+                    <span class="is-block is-size-7 has-text-grey mt-1">08:25</span>
+                  </span>
+                </a>
+              </section>
+
+              <section class="box">
+                <h2 class="title is-5 mb-4">今月の予算</h2>
+                <div class="is-flex is-justify-content-space-between mb-2">
+                  <span class="has-text-grey">利用済み</span>
+                  <strong>¥12,480 / ¥20,000</strong>
+                </div>
+                <progress class="progress is-primary" value="62" max="100">62%</progress>
+
+                <div class="columns is-mobile mt-4">
+                  <div class="column">
+                    <p class="heading">残額</p>
+                    <p class="has-text-weight-semibold">¥7,520</p>
+                  </div>
+                  <div class="column">
+                    <p class="heading">予測</p>
+                    <p class="has-text-weight-semibold">¥18,900</p>
+                  </div>
+                </div>
+              </section>
+
+              <article class="notification is-warning is-light">
+                <div class="is-flex">
+                  <span class="icon mr-2"><i class="bi bi-exclamation-circle"></i></span>
+                  <div>
+                    <strong class="is-size-7">Geminiで遅延を検知</strong>
+                    <p class="is-size-7 mt-1">直近5分の平均応答時間が通常より長くなっています。</p>
+                  </div>
+                </div>
+              </article>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script>
+    const lastSync = document.getElementById('lastSync');
+    const refreshButton = document.getElementById('refreshButton');
+    const serviceSyncs = document.querySelectorAll('.service-sync');
+
+    function formatDate(date) {
+      return new Intl.DateTimeFormat('ja-JP', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: false
+      }).format(date).replaceAll('/', '/');
+    }
+
+    function formatTime(date) {
+      return new Intl.DateTimeFormat('ja-JP', {
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: false
+      }).format(date);
+    }
+
+    function syncNow() {
+      const now = new Date();
+      lastSync.textContent = formatDate(now);
+      serviceSyncs.forEach((item, index) => {
+        const offset = index * 2;
+        const serviceTime = new Date(now.getTime() - offset * 1000);
+        item.textContent = formatTime(serviceTime);
+      });
+
+      refreshButton.classList.add('is-loading');
+      window.setTimeout(() => refreshButton.classList.remove('is-loading'), 500);
+    }
+
+    refreshButton.addEventListener('click', syncNow);
+    window.setInterval(syncNow, 30000);
+  </script>
+</body>
+</html>
